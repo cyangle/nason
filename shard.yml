@@ -1,0 +1,9 @@
+name: nason
+version: 0.1.0
+
+authors:
+  - Chao Yang <cyang05@outlook.com>
+
+crystal: ~> 1.0.0
+
+license: MIT
