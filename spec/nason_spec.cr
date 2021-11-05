@@ -1,9 +1,9 @@
 require "./spec_helper"
 
-describe Nason do
+describe NASON do
   # TODO: Write tests
 
   it "works" do
-    false.should eq(true)
+    NASON::VERSION.should eq("0.1.0")
   end
 end
