@@ -66,7 +66,7 @@ def Deque.from_json(string_or_io) : Nil
 end
 
 def Nil.new(pull : NASON::PullParser)
-  pull.read_null
+  pull.read_nil
 end
 
 def Bool.new(pull : NASON::PullParser)
@@ -320,7 +320,7 @@ def Union.new(pull : NASON::PullParser)
 
   {% begin %}
     case pull.kind
-    {% if T.includes? Nil %}
+    {% if T.includes? Null %}
     when .null?
       return pull.read_null
     {% end %}

@@ -7,10 +7,10 @@ describe NASON do
     NASON::VERSION.should eq("0.1.0")
   end
 
-  it "works" do
-    v = NASON.parse(%({"name": null}))
-    v["name"].as_null.should eq NULL
-    pp v["name"].as_null.to_s.should eq "null"
+  it "parses null value" do
+    obj = NASON.parse(%({"name": null}))
+    obj["name"].as_null.should eq NULL
+    obj["name"].as_null.to_s.should eq "null"
   end
 
   it "builds" do
@@ -26,6 +26,6 @@ describe NASON do
         end
       end
     end
-    obj.to_json.should eq ""
+    obj.to_s.should eq %({"name":null,"values":[null,null,null]})
   end
 end

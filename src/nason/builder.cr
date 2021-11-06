@@ -230,6 +230,11 @@ class NASON::Builder
   end
 
   # :ditto:
+  def scalar(value : Null)
+    null
+  end
+
+  # :ditto:
   def scalar(value : Bool)
     bool(value)
   end

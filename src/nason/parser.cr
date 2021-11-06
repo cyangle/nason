@@ -24,7 +24,7 @@ class NASON::Parser
     when .string?
       value_and_next_token token.string_value
     when .null?
-      value_and_next_token nil
+      value_and_next_token NULL
     when .true?
       value_and_next_token true
     when .false?

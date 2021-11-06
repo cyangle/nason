@@ -168,6 +168,7 @@ module NASON
                 has_default: ivar.has_default_value?,
                 default:     ivar.default_value,
                 nilable:     ivar.type.nilable?,
+                nullable:    ivar.type.union? && ivar.type.union_types.any? { |t| t.stringify == "Null" },
                 root:        ann && ann[:root],
                 converter:   ann && ann[:converter],
                 presence:    ann && ann[:presence],
@@ -195,8 +196,12 @@ module NASON
             when {{value[:key]}}
               %found{name} = true
               begin
+                {% if !value[:nullable] %}
+                pull.raise "Expecting none null value but got null for {{name}}" if pull.kind.null?
+                {% end %}
+
                 %var{name} =
-                  {% if value[:nilable] || value[:has_default] %} pull.read_null_or { {% end %}
+                  {% if value[:nullable] || value[:has_default] %} pull.read_null_or { {% end %}
 
                   {% if value[:root] %}
                     pull.on_key!({{value[:root]}}) do
@@ -212,7 +217,7 @@ module NASON
                     end
                   {% end %}
 
-                {% if value[:nilable] || value[:has_default] %} } {% end %}
+                {% if value[:nullable] || value[:has_default] %} } {% end %}
               rescue exc : ::NASON::ParseException
                 raise ::NASON::SerializableError.new(exc.message, self.class.to_s, {{value[:key]}}, *%key_location, exc)
               end
@@ -226,7 +231,7 @@ module NASON
         {% for name, value in properties %}
           {% unless value[:nilable] || value[:has_default] %}
             if %var{name}.nil? && !%found{name} && !::Union({{value[:type]}}).nilable?
-              raise ::NASON::SerializableError.new("Missing NASON attribute: {{value[:key].id}}", self.class.to_s, nil, *%location, nil)
+              raise ::NASON::SerializableError.new("Missing JSON attribute: {{value[:key].id}}", self.class.to_s, nil, *%location, nil)
             end
           {% end %}
 

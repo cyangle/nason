@@ -1,3 +1,5 @@
+require "./null.cr"
+
 # `NASON::Any` is a convenient wrapper around all possible NASON types (`NASON::Any::Type`)
 # and can be used for traversing dynamic or unknown NASON structures.
 #
@@ -18,7 +20,7 @@
 # which return `nil` when the underlying value type won't match.
 struct NASON::Any
   # All possible NASON types.
-  alias Type = Nil | Bool | Int64 | Float64 | String | Array(Any) | Hash(String, Any)
+  alias Type = Nil | Null | Bool | Int64 | Float64 | String | Array(Any) | Hash(String, Any)
 
   # Reads a `NASON::Any` value from the given pull parser.
   def self.new(pull : NASON::PullParser)
@@ -148,6 +150,10 @@ struct NASON::Any
   # Raises otherwise.
   def as_nil : Nil
     @raw.as(Nil)
+  end
+
+  def as_null : Null
+    @raw.as(Null)
   end
 
   # Checks that the underlying value is `Bool`, and returns its value.

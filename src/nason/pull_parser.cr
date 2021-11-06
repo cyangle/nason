@@ -196,7 +196,15 @@ class NASON::PullParser
   end
 
   # Reads a null value and returns it.
-  def read_null : Nil
+  def read_null : Null
+    expect_kind :null
+    read_next
+    NULL
+  end
+
+  # Reads a nil value and returns it.
+  # This should not happen in theory
+  def read_nil : Nil
     expect_kind :null
     read_next
     nil
@@ -312,22 +320,22 @@ class NASON::PullParser
   end
 
   # Reads a `Bool` or a null value, and returns it.
-  def read_bool_or_null : Bool?
+  def read_bool_or_null : Bool | Null
     read_null_or { read_bool }
   end
 
   # Reads an integer or a null value, and returns it.
-  def read_int_or_null : Int64?
+  def read_int_or_null : Int64 | Null
     read_null_or { read_int }
   end
 
   # Reads a float or a null value, and returns it.
-  def read_float_or_null : Float64?
+  def read_float_or_null : Float64 | Null
     read_null_or { read_float }
   end
 
   # Reads a string or a null value, and returns it.
-  def read_string_or_null : String?
+  def read_string_or_null : String | Null
     read_null_or { read_string }
   end
 
@@ -345,7 +353,7 @@ class NASON::PullParser
   def read_null_or
     if @kind.null?
       read_next
-      nil
+      NULL
     else
       yield
     end
