@@ -3,7 +3,29 @@ require "./spec_helper"
 describe NASON do
   # TODO: Write tests
 
-  it "works" do
+  it "has correct version number" do
     NASON::VERSION.should eq("0.1.0")
+  end
+
+  it "works" do
+    v = NASON.parse(%({"name": null}))
+    v["name"].as_null.should eq NULL
+    pp v["name"].as_null.to_s.should eq "null"
+  end
+
+  it "builds" do
+    obj = NASON.build do |json|
+      json.object do
+        json.field "name", NULL
+        json.field "values" do
+          json.array do
+            json.null
+            json.null
+            json.null
+          end
+        end
+      end
+    end
+    obj.to_json.should eq ""
   end
 end
