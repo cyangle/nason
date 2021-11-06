@@ -22,6 +22,10 @@ struct Null
     "null"
   end
 
+  def to_yaml(yaml : YAML::Nodes::Builder) : Nil
+    yaml.scalar "null"
+  end
+
   # Appends `"null"` to the given IO.
   def to_s(io : IO) : Nil
     io << to_s

@@ -201,7 +201,7 @@ module NASON
                 {% end %}
 
                 %var{name} =
-                  {% if value[:nullable] || value[:has_default] %} pull.read_null_or { {% end %}
+                  {% if value[:nullable] %} pull.read_null_or { {% end %}
 
                   {% if value[:root] %}
                     pull.on_key!({{value[:root]}}) do
@@ -217,7 +217,7 @@ module NASON
                     end
                   {% end %}
 
-                {% if value[:nullable] || value[:has_default] %} } {% end %}
+                {% if value[:nullable] %} } {% end %}
               rescue exc : ::NASON::ParseException
                 raise ::NASON::SerializableError.new(exc.message, self.class.to_s, {{value[:key]}}, *%key_location, exc)
               end
@@ -434,7 +434,7 @@ module NASON
         end
 
         unless discriminator_value
-          raise ::NASON::SerializableError.new("Missing NASON discriminator field '{{field.id}}'", to_s, nil, *location, nil)
+          raise ::NASON::SerializableError.new("Missing JSON discriminator field '{{field.id}}'", to_s, nil, *location, nil)
         end
 
         case discriminator_value

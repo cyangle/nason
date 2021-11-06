@@ -116,10 +116,10 @@ describe "NASON serialization" do
       tuple.should be_a(NamedTuple(x: Int32?, y: String))
     end
 
-    it "does for named tuple with nilable fields and null (#8089)" do
-      tuple = NamedTuple(x: Int32?, y: String).from_json(%({"y": "hello", "x": null}))
-      tuple.should eq({x: nil, y: "hello"})
-      tuple.should be_a(NamedTuple(x: Int32?, y: String))
+    it "does for named tuple with nullable fields and null (#8089)" do
+      tuple = NamedTuple(x: Int32 | Null, y: String).from_json(%({"y": "hello", "x": null}))
+      tuple.should eq({x: NULL, y: "hello"})
+      tuple.should be_a(NamedTuple(x: Int32 | Null, y: String))
     end
 
     it "does for named tuple with spaces in key (#10918)" do

@@ -395,7 +395,7 @@ class NASON::PullParser
     end
 
     unless found
-      raise "NASON key not found: #{key}"
+      raise "JSON key not found: #{key}"
     end
 
     value

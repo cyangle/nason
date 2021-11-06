@@ -20,13 +20,13 @@ describe NASON::Parser do
   it_parses %("hello"), "hello"
   it_parses "true", true
   it_parses "false", false
-  it_parses "null", nil
+  it_parses "null", NULL
 
   it_parses "[]", [] of Int32
   it_parses "[1]", [1]
   it_parses "[1, 2, 3]", [1, 2, 3]
   it_parses "[1.5]", [1.5]
-  it_parses "[null]", [nil]
+  it_parses "[null]", [NULL]
   it_parses "[true]", [true]
   it_parses "[false]", [false]
   it_parses %(["hello"]), ["hello"]

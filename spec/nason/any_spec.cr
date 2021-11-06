@@ -4,7 +4,7 @@ require "yaml"
 describe NASON::Any do
   describe "casts" do
     it "gets nil" do
-      NASON.parse("null").as_nil.should be_nil
+      NASON.parse("null").as_null.should eq NULL
     end
 
     it "gets bool" do

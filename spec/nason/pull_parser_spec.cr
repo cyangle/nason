@@ -11,6 +11,11 @@ class NASON::PullParser
     read_next
   end
 
+  def assert(value : Null)
+    kind.should eq(NASON::PullParser::Kind::Null)
+    read_next
+  end
+
   def assert(value : Int)
     kind.should eq(NASON::PullParser::Kind::Int)
     int_value.should eq(value)
@@ -219,22 +224,22 @@ describe NASON::PullParser do
   end
 
   it "reads bool or null" do
-    NASON::PullParser.new("null").read_bool_or_null.should be_nil
+    NASON::PullParser.new("null").read_bool_or_null.should eq NULL
     NASON::PullParser.new("false").read_bool_or_null.should be_false
   end
 
   it "reads int or null" do
-    NASON::PullParser.new("null").read_int_or_null.should be_nil
+    NASON::PullParser.new("null").read_int_or_null.should eq NULL
     NASON::PullParser.new("1").read_int_or_null.should eq(1)
   end
 
   it "reads float or null" do
-    NASON::PullParser.new("null").read_float_or_null.should be_nil
+    NASON::PullParser.new("null").read_float_or_null.should eq NULL
     NASON::PullParser.new("1.5").read_float_or_null.should eq(1.5)
   end
 
   it "reads string or null" do
-    NASON::PullParser.new("null").read_string_or_null.should be_nil
+    NASON::PullParser.new("null").read_string_or_null.should eq NULL
     NASON::PullParser.new(%("hello")).read_string_or_null.should eq("hello")
   end
 
@@ -306,7 +311,7 @@ describe NASON::PullParser do
     it "doesn't find key with bang" do
       pull = NASON::PullParser.new(%({"foo": 1, "baz": 2}))
 
-      expect_raises Exception, "NASON key not found: bar" do
+      expect_raises Exception, "JSON key not found: bar" do
         pull.on_key!("bar") do
         end
       end
