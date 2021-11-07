@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ameba
+./bin/ameba
 ameba_status=$?
 
 crystal tool format --check
