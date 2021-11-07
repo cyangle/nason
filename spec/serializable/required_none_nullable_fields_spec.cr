@@ -24,19 +24,19 @@ describe NASON do
 
   it "should not parse null" do
     expect_raises(NASON::SerializableError, "Expecting none null value but got null") do
-      l = Location.from_json(%({"lat":1.2,"lng":null}))
+      Location.from_json(%({"lat":1.2,"lng":null}))
     end
   end
 
   it "should not parse nulls" do
     expect_raises(NASON::SerializableError, "Expecting none null value but got null") do
-      l = Location.from_json(%({"lat":null,"lng":null}))
+      Location.from_json(%({"lat":null,"lng":null}))
     end
   end
 
   it "should not parse empty object" do
     expect_raises(NASON::SerializableError, "Missing JSON attribute: lat") do
-      l = Location.from_json(%({}))
+      Location.from_json(%({}))
     end
   end
 

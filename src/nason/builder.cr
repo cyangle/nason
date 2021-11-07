@@ -29,7 +29,7 @@ class NASON::Builder
 
   # Starts a document.
   def start_document : Nil
-    case state = @state.last
+    case @state.last
     when StartState
       @state[-1] = DocumentStartState.new
     when DocumentEndState
@@ -41,7 +41,7 @@ class NASON::Builder
 
   # Signals the end of a NASON document.
   def end_document : Nil
-    case state = @state.last
+    case @state.last
     when StartState
       raise NASON::Error.new("Empty NASON")
     when DocumentStartState

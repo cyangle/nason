@@ -24,7 +24,7 @@ describe NASON do
 
   it "should not parse null" do
     expect_raises(NASON::SerializableError, "Expecting none null value but got null") do
-      l = OLocation.from_json(%({"lat":1.2,"lng":null}))
+      OLocation.from_json(%({"lat":1.2,"lng":null}))
     end
   end
 

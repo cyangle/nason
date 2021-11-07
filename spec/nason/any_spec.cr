@@ -22,8 +22,8 @@ describe NASON::Any do
     end
 
     it "gets int64" do
-      NASON.parse("123456789123456").as_i64.should eq(123456789123456)
-      NASON.parse("123456789123456").as_i64?.should eq(123456789123456)
+      NASON.parse("123456789123456").as_i64.should eq(123_456_789_123_456)
+      NASON.parse("123456789123456").as_i64?.should eq(123_456_789_123_456)
       NASON.parse("true").as_i64?.should be_nil
     end
 
