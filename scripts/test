@@ -1,0 +1,9 @@
+#!/bin/sh
+
+crystal spec
+test_status=$?
+
+if [ "$test_status" != "0" ] ; then
+  echo "crystal spec failed"
+  exit 1
+fi

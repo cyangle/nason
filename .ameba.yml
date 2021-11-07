@@ -15,7 +15,6 @@ Metrics/CyclomaticComplexity:
   Description: Disallows methods with a cyclomatic complexity higher than `MaxComplexity`
   MaxComplexity: 20
   Excluded:
-  - src/nason/token.cr
   - src/nason/pull_parser.cr
   - src/nason/builder.cr
   - src/nason/lexer.cr

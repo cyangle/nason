@@ -1,0 +1,20 @@
+#!/bin/sh
+
+ameba
+ameba_status=$?
+
+crystal tool format --check
+format_status=$?
+
+if [ "$ameba_status" != "0" ] ; then
+  echo "ameba check failed"
+fi
+
+if [ "$format_status" != "0" ] ; then
+  echo "crystal tool format check failed"
+fi
+
+if [ "$ameba_status" != "0" ] || [ "$format_status" != "0" ] ; then
+  echo "lint check failed"
+  exit 1
+fi
