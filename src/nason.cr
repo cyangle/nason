@@ -113,6 +113,7 @@
 # for custom objects, either manually or using `NASON::Serializable`.
 module NASON
   VERSION = "0.1.0"
+
   # Generic NASON error.
   class Error < Exception
   end

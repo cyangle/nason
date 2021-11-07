@@ -72,7 +72,6 @@ struct Null
     self
   end
 
-
   def initialize
   end
 
