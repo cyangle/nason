@@ -216,32 +216,13 @@ class JSONAttrWithNilableUnion2
   property value : Int32 | Nil | Null
 end
 
-class JSONAttrWithPresence
-  include NASON::Serializable
-
-  @[NASON::Field(presence: true)]
-  property first_name : String? | Null
-
-  @[NASON::Field(presence: true)]
-  property last_name : String?
-
-  @[NASON::Field(ignore: true)]
-  getter? first_name_present : Bool
-
-  @[NASON::Field(ignore: true)]
-  getter? last_name_present : Bool
-end
-
 class JSONAttrWithQueryAttributes
   include NASON::Serializable
 
   property? foo : Bool
 
-  @[NASON::Field(key: "is_bar", presence: true)]
+  @[NASON::Field(key: "is_bar")]
   property? bar : Bool = false
-
-  @[NASON::Field(ignore: true)]
-  getter? bar_present : Bool
 end
 
 module JSONAttrModule
@@ -777,16 +758,6 @@ describe "NASON mapping" do
     obj.to_json.should eq(%({}))
   end
 
-  describe "parses NASON with presence markers" do
-    it "parses person with absent attributes" do
-      json = JSONAttrWithPresence.from_json(%({"first_name": null}))
-      json.first_name.should eq NULL
-      json.first_name_present?.should be_true
-      json.last_name.should be_nil
-      json.last_name_present?.should be_false
-    end
-  end
-
   describe "with query attributes" do
     it "defines query getter" do
       json = JSONAttrWithQueryAttributes.from_json(%({"foo": true}))
@@ -804,14 +775,12 @@ describe "NASON mapping" do
 
     it "defines non-query setter and presence methods" do
       json = JSONAttrWithQueryAttributes.from_json(%({"foo": false}))
-      json.bar_present?.should be_false
       json.bar = true
       json.bar?.should be_true
     end
 
     it "maps non-query attributes" do
       json = JSONAttrWithQueryAttributes.from_json(%({"foo": false, "is_bar": false}))
-      json.bar_present?.should be_true
       json.bar?.should be_false
       json.bar = true
       json.to_json.should eq(%({"foo":false,"is_bar":true}))

@@ -72,7 +72,6 @@ module NASON
   # * **key**: the value of the key in the json object (by default the name of the instance variable)
   # * **root**: assume the value is inside a NASON object with a given key (see `Object.from_json(string_or_io, root)`)
   # * **converter**: specify an alternate type for parsing and generation. The converter must define `from_json(NASON::PullParser)` and `to_json(value, NASON::Builder)`. Examples of converters are a `Time::Format` instance and `Time::EpochConverter` for `Time`.
-  # * **presence**: if `true`, a `@{{key}}_present` instance variable will be generated when the key was present (even if it has a `null` value), `false` by default
   #
   # Deserialization also respects default values of variables:
   # ```
@@ -161,7 +160,6 @@ module NASON
                 nullable:    ivar.type.union? && ivar.type.union_types.any? { |t| t.stringify == "Null" },
                 root:        ann && ann[:root],
                 converter:   ann && ann[:converter],
-                presence:    ann && ann[:presence],
               }
             %}
           {% end %}
@@ -237,10 +235,6 @@ module NASON
             end
           {% else %}
             @{{name}} = (%var{name}).as({{value[:type]}})
-          {% end %}
-
-          {% if value[:presence] %}
-            @{{name}}_present = %found{name}
           {% end %}
         {% end %}
       {% end %}
