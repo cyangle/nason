@@ -47,15 +47,22 @@ module NASON
   #
   # To change how individual instance variables are parsed and serialized, the annotation `NASON::Field`
   # can be placed on the instance variable. Annotating property, getter and setter macros is also allowed.
+  # You need add type `Null` to the field if the field is allowed to have null value.
+  # To set null value to the field, just assign constant `NULL` to it.
   # ```
   # require "nason"
   #
   # class A
   #   include NASON::Serializable
   #
-  #   @[NASON::Field(key: "my_key", emit_null: true)]
-  #   getter a : Int32?
+  #   @[NASON::Field(key: "my_key")]
+  #   property a : Int32? | Null
   # end
+  #
+  # obj = A.from_json(%({"my_key":null})) # => A(@a=null)
+  # obj.a                                 # => null
+  # obj.a == NULL                         # => true
+  # obj.to_json                           # => "{\"my_key\":null}"
   # ```
   #
   # `NASON::Field` properties:
@@ -66,7 +73,6 @@ module NASON
   # * **root**: assume the value is inside a NASON object with a given key (see `Object.from_json(string_or_io, root)`)
   # * **converter**: specify an alternate type for parsing and generation. The converter must define `from_json(NASON::PullParser)` and `to_json(value, NASON::Builder)`. Examples of converters are a `Time::Format` instance and `Time::EpochConverter` for `Time`.
   # * **presence**: if `true`, a `@{{key}}_present` instance variable will be generated when the key was present (even if it has a `null` value), `false` by default
-  # * **emit_null**: if `true`, emits a `null` value for nilable property (by default nulls are not emitted)
   #
   # Deserialization also respects default values of variables:
   # ```
@@ -100,22 +106,6 @@ module NASON
   #
   # a = A.from_json(%({"a":1,"b":2})) # => A(@json_unmapped={"b" => 2_i64}, @a=1)
   # a.to_json                         # => {"a":1,"b":2}
-  # ```
-  #
-  #
-  # ### Class annotation `NASON::Serializable::Options`
-  #
-  # supported properties:
-  # * **emit_nulls**: if `true`, emits a `null` value for all nilable properties (by default nulls are not emitted)
-  #
-  # ```
-  # require "nason"
-  #
-  # @[NASON::Serializable::Options(emit_nulls: true)]
-  # class A
-  #   include NASON::Serializable
-  #   @a : Int32?
-  # end
   # ```
   #
   # ### Discriminator field
@@ -269,9 +259,6 @@ module NASON
 
     def to_json(json : ::NASON::Builder)
       {% begin %}
-        {% options = @type.annotation(::NASON::Serializable::Options) %}
-        {% emit_nulls = options && options[:emit_nulls] %}
-
         {% properties = {} of Nil => Nil %}
         {% for ivar in @type.instance_vars %}
           {% ann = ivar.annotation(::NASON::Field) %}
@@ -282,7 +269,6 @@ module NASON
                 key:       ((ann && ann[:key]) || ivar).id.stringify,
                 root:      ann && ann[:root],
                 converter: ann && ann[:converter],
-                emit_null: (ann && (ann[:emit_null] != nil) ? ann[:emit_null] : emit_nulls),
               }
             %}
           {% end %}
@@ -291,45 +277,30 @@ module NASON
         json.object do
           {% for name, value in properties %}
             _{{name}} = @{{name}}
-
-            {% unless value[:emit_null] %}
               unless _{{name}}.nil?
-            {% end %}
+                json.field({{value[:key]}}) do
+                  {% if value[:root] %}
 
-              json.field({{value[:key]}}) do
-                {% if value[:root] %}
-                  {% if value[:emit_null] %}
-                    if _{{name}}.nil?
-                      nil.to_json(json)
+                    json.object do
+                      json.field({{value[:root]}}) do
+                  {% end %}
+
+                  {% if value[:converter] %}
+                    if _{{name}}
+                      {{ value[:converter] }}.to_json(_{{name}}, json)
                     else
+                      nil.to_json(json)
+                    end
+                  {% else %}
+                    _{{name}}.to_json(json)
                   {% end %}
 
-                  json.object do
-                    json.field({{value[:root]}}) do
-                {% end %}
-
-                {% if value[:converter] %}
-                  if _{{name}}
-                    {{ value[:converter] }}.to_json(_{{name}}, json)
-                  else
-                    nil.to_json(json)
-                  end
-                {% else %}
-                  _{{name}}.to_json(json)
-                {% end %}
-
-                {% if value[:root] %}
-                  {% if value[:emit_null] %}
+                  {% if value[:root] %}
+                      end
                     end
                   {% end %}
-                    end
-                  end
-                {% end %}
+                end
               end
-
-            {% unless value[:emit_null] %}
-              end
-            {% end %}
           {% end %}
           on_to_json(json)
         end

@@ -62,27 +62,6 @@ class JSONAttrPersonExtraFields
   property age : Int32?
 end
 
-class JSONAttrPersonEmittingNull
-  include NASON::Serializable
-
-  property name : String
-
-  @[NASON::Field(emit_null: true)]
-  property age : Int32?
-end
-
-@[NASON::Serializable::Options(emit_nulls: true)]
-class JSONAttrPersonEmittingNullsByOptions
-  include NASON::Serializable
-
-  property name : String
-  property age : Int32?
-  property value1 : Int32?
-
-  @[NASON::Field(emit_null: false)]
-  property value2 : Int32?
-end
-
 class JSONAttrWithBool
   include NASON::Serializable
 
@@ -114,16 +93,6 @@ class JSONAttrWithNilableTime
   include NASON::Serializable
 
   @[NASON::Field(converter: Time::Format.new("%F"))]
-  property value : Time?
-
-  def initialize
-  end
-end
-
-class JSONAttrWithNilableTimeEmittingNull
-  include NASON::Serializable
-
-  @[NASON::Field(converter: Time::Format.new("%F"), emit_null: true)]
   property value : Time?
 
   def initialize
@@ -557,16 +526,6 @@ describe "NASON mapping" do
     (person.to_json =~ /age/).should be_falsey
   end
 
-  it "emits null on request when doing to_json" do
-    person = JSONAttrPersonEmittingNull.from_json(%({"name": "John"}))
-    (person.to_json =~ /age/).should be_truthy
-  end
-
-  it "emit_nulls option" do
-    person = JSONAttrPersonEmittingNullsByOptions.from_json(%({"name": "John"}))
-    person.to_json.should eq "{\"name\":\"John\",\"age\":null,\"value1\":null}"
-  end
-
   it "doesn't raises on false value when not-nil" do
     json = JSONAttrWithBool.from_json(%({"value": false}))
     json.value.should be_false
@@ -601,11 +560,6 @@ describe "NASON mapping" do
   it "outputs with converter when nilable" do
     json = JSONAttrWithNilableTime.new
     json.to_json.should eq("{}")
-  end
-
-  it "outputs with converter when nilable when emit_null is true" do
-    json = JSONAttrWithNilableTimeEmittingNull.new
-    json.to_json.should eq(%({"value":null}))
   end
 
   it "outputs NASON with properties key" do
