@@ -116,9 +116,6 @@ module NASON
   #
   # You can use `NASON::Serializable.use_json_discriminator` for this use case.
   module Serializable
-    annotation Options
-    end
-
     macro included
       # Define a `new` directly in the included type,
       # so it overloads well with other possible initializes
