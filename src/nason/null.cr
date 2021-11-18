@@ -95,3 +95,13 @@ struct Null
 end
 
 NULL = Null.null
+
+class Object
+  def null?
+    self == NULL
+  end
+
+  def nil_or_null?
+    nil? || null?
+  end
+end

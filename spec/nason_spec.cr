@@ -10,6 +10,8 @@ describe NASON do
   it "parses null value" do
     obj = NASON.parse(%({"name": null}))
     obj["name"].as_null.should eq NULL
+    obj["name"].as_null.null?.should eq true
+    obj["name"].as_null.nil_or_null?.should eq true
     obj["name"].as_null.to_s.should eq "null"
   end
 
