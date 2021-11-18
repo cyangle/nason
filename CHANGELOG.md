@@ -1,3 +1,7 @@
+# 0.2.2
+
+Update crystal version support.
+
 # 0.2.1
 
 Add helper methods `null?` and `nil_or_null?` to Object.
