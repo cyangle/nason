@@ -1,3 +1,7 @@
+# 0.2.4
+
+Add OAuth and Oauth2 json methods
+
 # 0.2.3
 
 Add assertion helper methods to Null and Object.

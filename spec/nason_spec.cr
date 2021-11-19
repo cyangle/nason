@@ -4,7 +4,7 @@ describe NASON do
   # TODO: Write tests
 
   it "has correct version number" do
-    NASON::VERSION.should eq("0.2.3")
+    NASON::VERSION.should eq("0.2.4")
   end
 
   it "parses null value" do
