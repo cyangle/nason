@@ -141,3 +141,5 @@ end
 require "./nason/*"
 require "./big/*"
 require "./uuid/*"
+require "./oauth/*"
+require "./oauth2/*"
