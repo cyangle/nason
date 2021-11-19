@@ -1,3 +1,9 @@
+class NullAssertionError < Exception
+  def initialize(message = "Null assertion failed")
+    super(message)
+  end
+end
+
 struct Null
   # Returns `0_u64`. Even though `Null` is not a `Reference` type, it is usually
   # mixed with them to form nilable types so it's useful to have an
@@ -55,6 +61,10 @@ struct Null
     self
   end
 
+  def not_null! : NoReturn
+    raise NullAssertionError.new
+  end
+
   # Returns `self`.
   # This method enables to call the `presence` method (see `String#presence`) on a union with `Null`.
   # The idea is to return `nil` when the value is `nil` or empty.
@@ -103,5 +113,17 @@ class Object
 
   def nil_or_null?
     nil? || null?
+  end
+
+  def not_null!
+    self
+  end
+
+  def present?
+    !nil? && !null?
+  end
+
+  def present!
+    not_nil!.not_null!
   end
 end

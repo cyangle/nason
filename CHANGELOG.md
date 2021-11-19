@@ -1,3 +1,7 @@
+# 0.2.3
+
+Add assertion helper methods to Null and Object.
+
 # 0.2.2
 
 Update crystal version support.
