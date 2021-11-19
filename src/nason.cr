@@ -138,8 +138,10 @@ module NASON
   end
 end
 
+require "json"
 require "./nason/*"
 require "./big/*"
 require "./uuid/*"
+require "./file.cr"
 require "./oauth/*"
-require "./oauth2/*"
+require "./oauth2/access_token/*"

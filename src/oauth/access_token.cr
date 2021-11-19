@@ -1,5 +1,37 @@
 class OAuth::AccessToken
-  def self.new(pull : NASON::PullParser)
+  getter token : String
+  getter secret : String
+
+  def initialize(@token : String, @secret : String, @extra : Hash(String, String)? = nil)
+  end
+
+  def authenticate(client, consumer_key, consumer_secret, extra_params = nil)
+    OAuth.authenticate(client, @token, @secret, consumer_key, consumer_secret, extra_params)
+  end
+
+  def extra : Hash(String, String)
+    @extra ||= {} of String => String
+  end
+
+  def self.from_response(response : String) : self
+    token = nil
+    secret = nil
+    extra = nil
+
+    URI::Params.parse(response) do |key, value|
+      case key
+      when "oauth_token"        then token = value
+      when "oauth_token_secret" then secret = value
+      else
+        extra ||= {} of String => String
+        extra[key] = value
+      end
+    end
+
+    new token.not_nil!, secret.not_nil!, extra
+  end
+
+  def self.new(pull : JSON::PullParser | NASON::PullParser)
     token = nil
     secret = nil
     extra = nil
@@ -23,7 +55,7 @@ class OAuth::AccessToken
     new token.not_nil!, secret.not_nil!, extra
   end
 
-  def to_json(json : NASON::Builder)
+  def to_json(json : JSON::Builder | NASON::Builder)
     json.object do
       json.field "oauth_token", @token
       json.field "oauth_token_secret", @secret
