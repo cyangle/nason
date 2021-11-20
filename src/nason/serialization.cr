@@ -25,23 +25,23 @@ module NASON
   #   property location : Location?
   # end
   #
-  # house = House.from_json(%({"address": "Crystal Road 1234", "location": {"lat": 12.3, "lng": 34.5}}))
+  # house = House.from_nason(%({"address": "Crystal Road 1234", "location": {"lat": 12.3, "lng": 34.5}}))
   # house.address  # => "Crystal Road 1234"
   # house.location # => #<Location:0x10cd93d80 @latitude=12.3, @longitude=34.5>
-  # house.to_json  # => %({"address":"Crystal Road 1234","location":{"lat":12.3,"lng":34.5}})
+  # house.to_nason # => %({"address":"Crystal Road 1234","location":{"lat":12.3,"lng":34.5}})
   #
-  # houses = Array(House).from_json(%([{"address": "Crystal Road 1234", "location": {"lat": 12.3, "lng": 34.5}}]))
-  # houses.size    # => 1
-  # houses.to_json # => %([{"address":"Crystal Road 1234","location":{"lat":12.3,"lng":34.5}}])
+  # houses = Array(House).from_nason(%([{"address": "Crystal Road 1234", "location": {"lat": 12.3, "lng": 34.5}}]))
+  # houses.size     # => 1
+  # houses.to_nason # => %([{"address":"Crystal Road 1234","location":{"lat":12.3,"lng":34.5}}])
   # ```
   #
   # ### Usage
   #
-  # Including `NASON::Serializable` will create `#to_json` and `self.from_json` methods on the current class,
+  # Including `NASON::Serializable` will create `#to_nason` and `self.from_nason` methods on the current class,
   # and a constructor which takes a `NASON::PullParser`. By default, these methods serialize into a json
   # object containing the value of every instance variable, the keys being the instance variable name.
   # Most primitives and collections supported as instance variable values (string, integer, array, hash, etc.),
-  # along with objects which define to_json and a constructor taking a `NASON::PullParser`.
+  # along with objects which define to_nason and a constructor taking a `NASON::PullParser`.
   # Union types are also supported, including unions with nil. If multiple types in a union parse correctly,
   # it is undefined which one will be chosen.
   #
@@ -59,10 +59,10 @@ module NASON
   #   property a : Int32? | Null
   # end
   #
-  # obj = A.from_json(%({"my_key":null})) # => A(@a=null)
-  # obj.a                                 # => null
-  # obj.a == NULL                         # => true
-  # obj.to_json                           # => "{\"my_key\":null}"
+  # obj = A.from_nason(%({"my_key":null})) # => A(@a=null)
+  # obj.a                                  # => null
+  # obj.a == NULL                          # => true
+  # obj.to_nason                           # => "{\"my_key\":null}"
   # ```
   #
   # `NASON::Field` properties:
@@ -70,8 +70,8 @@ module NASON
   # * **ignore_serialize**: if `true` skip this field in serialization (by default false)
   # * **ignore_deserialize**: if `true` skip this field in deserialization (by default false)
   # * **key**: the value of the key in the json object (by default the name of the instance variable)
-  # * **root**: assume the value is inside a NASON object with a given key (see `Object.from_json(string_or_io, root)`)
-  # * **converter**: specify an alternate type for parsing and generation. The converter must define `from_json(NASON::PullParser)` and `to_json(value, NASON::Builder)`. Examples of converters are a `Time::Format` instance and `Time::EpochConverter` for `Time`.
+  # * **root**: assume the value is inside a NASON object with a given key (see `Object.from_nason(string_or_io, root)`)
+  # * **converter**: specify an alternate type for parsing and generation. The converter must define `from_nason(NASON::PullParser)` and `to_nason(value, NASON::Builder)`. Examples of converters are a `Time::Format` instance and `Time::EpochConverter` for `Time`.
   #
   # Deserialization also respects default values of variables:
   # ```
@@ -83,7 +83,7 @@ module NASON
   #   @b : Float64 = 1.0
   # end
   #
-  # A.from_json(%<{"a":1}>) # => A(@a=1, @b=1.0)
+  # A.from_nason(%<{"a":1}>) # => A(@a=1, @b=1.0)
   # ```
   #
   # ### Extensions: `NASON::Serializable::Strict` and `NASON::Serializable::Unmapped`.
@@ -103,8 +103,8 @@ module NASON
   #   @a : Int32
   # end
   #
-  # a = A.from_json(%({"a":1,"b":2})) # => A(@json_unmapped={"b" => 2_i64}, @a=1)
-  # a.to_json                         # => {"a":1,"b":2}
+  # a = A.from_nason(%({"a":1,"b":2})) # => A(@json_unmapped={"b" => 2_i64}, @a=1)
+  # a.to_nason                         # => {"a":1,"b":2}
   # ```
   #
   # ### Discriminator field
@@ -193,7 +193,7 @@ module NASON
                   {% end %}
 
                   {% if value[:converter] %}
-                    {{value[:converter]}}.from_json(pull)
+                    {{value[:converter]}}.from_nason(pull)
                   {% else %}
                     ::Union({{value[:type]}}).new(pull)
                   {% end %}
@@ -248,7 +248,7 @@ module NASON
     protected def on_to_json(json : ::NASON::Builder)
     end
 
-    def to_json(json : ::NASON::Builder)
+    def to_nason(json : ::NASON::Builder)
       {% begin %}
         {% properties = {} of Nil => Nil %}
         {% for ivar in @type.instance_vars %}
@@ -278,12 +278,12 @@ module NASON
 
                   {% if value[:converter] %}
                     if _{{name}}
-                      {{ value[:converter] }}.to_json(_{{name}}, json)
+                      {{ value[:converter] }}.to_nason(_{{name}}, json)
                     else
-                      nil.to_json(json)
+                      nil.to_nason(json)
                     end
                   {% else %}
-                    _{{name}}.to_json(json)
+                    _{{name}}.to_nason(json)
                   {% end %}
 
                   {% if value[:root] %}
@@ -318,7 +318,7 @@ module NASON
 
       protected def on_to_json(json)
         json_unmapped.each do |key, value|
-          json.field(key) { value.to_json(json) }
+          json.field(key) { value.to_nason(json) }
         end
       end
     end
@@ -353,8 +353,8 @@ module NASON
     #   property radius : Int32
     # end
     #
-    # Shape.from_json(%({"type": "point", "x": 1, "y": 2}))               # => #<Point:0x10373ae20 @type="point", @x=1, @y=2>
-    # Shape.from_json(%({"type": "circle", "x": 1, "y": 2, "radius": 3})) # => #<Circle:0x106a4cea0 @type="circle", @x=1, @y=2, @radius=3>
+    # Shape.from_nason(%({"type": "point", "x": 1, "y": 2}))               # => #<Point:0x10373ae20 @type="point", @x=1, @y=2>
+    # Shape.from_nason(%({"type": "circle", "x": 1, "y": 2, "radius": 3})) # => #<Circle:0x106a4cea0 @type="circle", @x=1, @y=2, @radius=3>
     # ```
     macro use_json_discriminator(field, mapping)
       {% unless mapping.is_a?(HashLiteral) || mapping.is_a?(NamedTupleLiteral) %}
@@ -414,7 +414,7 @@ module NASON
               {% key.raise "mapping keys must be one of StringLiteral, NumberLiteral, BoolLiteral, or Path, not #{key.class_name.id}" %}
             {% end %}
           {% end %}
-          {{value.id}}.from_json(json)
+          {{value.id}}.from_nason(json)
         {% end %}
         else
           raise ::NASON::SerializableError.new("Unknown '{{field.id}}' discriminator value: #{discriminator_value.inspect}", to_s, nil, *location, nil)

@@ -124,8 +124,8 @@ end
 
 private def it_reads(value, file = __FILE__, line = __LINE__)
   type = value.class
-  it "reads #{type}: #{value.to_json}", file: file, line: line do
-    pull = NASON::PullParser.new(value.to_json)
+  it "reads #{type}: #{value.to_nason}", file: file, line: line do
+    pull = NASON::PullParser.new(value.to_nason)
     pull.read?(type).should eq(value)
   end
 end
@@ -364,7 +364,7 @@ describe NASON::PullParser do
       {% value = pair[1] %}
 
       it "reads {{type}} when the token is a compatible kind" do
-        pull = NASON::PullParser.new({{value}}.to_json)
+        pull = NASON::PullParser.new({{value}}.to_nason)
         pull.read?({{type}}).should eq({{value}})
       end
 
@@ -439,7 +439,7 @@ describe NASON::PullParser do
       {% value = pair[1] %}
 
       it "returns nil in place of {{type}} when an overflow occurs" do
-        pull = NASON::PullParser.new({{value}}.to_json)
+        pull = NASON::PullParser.new({{value}}.to_nason)
         pull.read?({{type}}).should be_nil
       end
     {% end %}

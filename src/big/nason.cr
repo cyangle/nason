@@ -31,7 +31,7 @@ struct BigInt
     to_s
   end
 
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.number(self)
   end
 end
@@ -58,7 +58,7 @@ struct BigFloat
     to_s
   end
 
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.number(self)
   end
 end
@@ -85,7 +85,7 @@ struct BigDecimal
     to_s
   end
 
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.number(self)
   end
 end

@@ -6,8 +6,8 @@ private def assert_built(expected, *, file = __FILE__, line = __LINE__)
 end
 
 private class TestObject
-  def to_json(builder)
-    {"int" => 12}.to_json(builder)
+  def to_nason(builder)
+    {"int" => 12}.to_nason(builder)
   end
 end
 

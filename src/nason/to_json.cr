@@ -1,13 +1,13 @@
 class Object
-  def to_json : String
+  def to_nason : String
     String.build do |str|
-      to_json str
+      to_nason str
     end
   end
 
-  def to_json(io : IO) : Nil
+  def to_nason(io : IO) : Nil
     NASON.build(io) do |json|
-      to_json(json)
+      to_nason(json)
     end
   end
 
@@ -19,13 +19,13 @@ class Object
 
   def to_pretty_json(io : IO, indent : String = "  ") : Nil
     NASON.build(io, indent: indent) do |json|
-      to_json(json)
+      to_nason(json)
     end
   end
 end
 
 struct Nil
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.null
   end
 
@@ -35,13 +35,13 @@ struct Nil
 end
 
 struct Bool
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.bool(self)
   end
 end
 
 struct Int
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.number(self)
   end
 
@@ -51,7 +51,7 @@ struct Int
 end
 
 struct Float
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.number(self)
   end
 
@@ -61,7 +61,7 @@ struct Float
 end
 
 class String
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.string(self)
   end
 
@@ -71,8 +71,8 @@ class String
 end
 
 struct Path
-  def to_json(json : NASON::Builder) : Nil
-    @name.to_json(json)
+  def to_nason(json : NASON::Builder) : Nil
+    @name.to_nason(json)
   end
 
   def to_json_object_key
@@ -81,7 +81,7 @@ struct Path
 end
 
 struct Symbol
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.string(to_s)
   end
 
@@ -91,25 +91,25 @@ struct Symbol
 end
 
 class Array
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.array do
-      each &.to_json(json)
+      each &.to_nason(json)
     end
   end
 end
 
 class Deque
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.array do
-      each &.to_json(json)
+      each &.to_nason(json)
     end
   end
 end
 
 struct Set
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.array do
-      each &.to_json(json)
+      each &.to_nason(json)
     end
   end
 end
@@ -118,13 +118,13 @@ class Hash
   # Serializes this Hash into NASON.
   #
   # Keys are serialized by invoking `to_json_object_key` on them.
-  # Values are serialized with the usual `to_json(json : NASON::Builder)`
+  # Values are serialized with the usual `to_nason(json : NASON::Builder)`
   # method.
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.object do
       each do |key, value|
         json.field key.to_json_object_key do
-          value.to_json(json)
+          value.to_nason(json)
         end
       end
     end
@@ -132,21 +132,21 @@ class Hash
 end
 
 struct Tuple
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.array do
       {% for i in 0...T.size %}
-        self[{{i}}].to_json(json)
+        self[{{i}}].to_nason(json)
       {% end %}
     end
   end
 end
 
 struct NamedTuple
-  def to_json(json : NASON::Builder)
+  def to_nason(json : NASON::Builder)
     json.object do
       {% for key in T.keys %}
         json.field {{key.stringify}} do
-          self[{{key.symbolize}}].to_json(json)
+          self[{{key.symbolize}}].to_nason(json)
         end
       {% end %}
     end
@@ -154,8 +154,8 @@ struct NamedTuple
 end
 
 struct Time::Format
-  def to_json(value : Time, json : NASON::Builder) : Nil
-    format(value).to_json(json)
+  def to_nason(value : Time, json : NASON::Builder) : Nil
+    format(value).to_nason(json)
   end
 end
 
@@ -171,8 +171,8 @@ struct Enum
   #   SECOND_STAGE
   # end
   #
-  # Stages::INITIAL.to_json      # => %("initial")
-  # Stages::SECOND_STAGE.to_json # => %("second_stage")
+  # Stages::INITIAL.to_nason      # => %("initial")
+  # Stages::SECOND_STAGE.to_nason # => %("second_stage")
   # ```
   #
   # For flags enums, the serialization is a NASON array including every flagged
@@ -187,15 +187,15 @@ struct Enum
   #   RIGHT
   # end
   #
-  # Sides::LEFT.to_json                  # => %(["left"])
-  # (Sides::LEFT | Sides::RIGHT).to_json # => %(["left","right"])
-  # Sides::All.to_json                   # => %(["left","right"])
-  # Sides::None.to_json                  # => %([])
+  # Sides::LEFT.to_nason                  # => %(["left"])
+  # (Sides::LEFT | Sides::RIGHT).to_nason # => %(["left","right"])
+  # Sides::All.to_nason                   # => %(["left","right"])
+  # Sides::None.to_nason                  # => %([])
   # ```
   #
-  # `ValueConverter.to_json` offers a different serialization strategy based on the
+  # `ValueConverter.to_nason` offers a different serialization strategy based on the
   # member value.
-  def to_json(json : NASON::Builder)
+  def to_nason(json : NASON::Builder)
     {% if @type.annotation(Flags) %}
       json.array do
         each do |member, _value|
@@ -209,15 +209,15 @@ struct Enum
 end
 
 module Enum::ValueConverter(T)
-  def self.to_json(value : T)
+  def self.to_nason(value : T)
     String.build do |io|
-      to_json(value, io)
+      to_nason(value, io)
     end
   end
 
-  def self.to_json(value : T, io : IO)
+  def self.to_nason(value : T, io : IO)
     NASON.build(io) do |json|
-      to_json(value, json)
+      to_nason(value, json)
     end
   end
 
@@ -232,8 +232,8 @@ module Enum::ValueConverter(T)
   #   SECOND_STAGE
   # end
   #
-  # Enum::ValueConverter.to_json(Stages::INITIAL)      # => %(0)
-  # Enum::ValueConverter.to_json(Stages::SECOND_STAGE) # => %(1)
+  # Enum::ValueConverter.to_nason(Stages::INITIAL)      # => %(0)
+  # Enum::ValueConverter.to_nason(Stages::SECOND_STAGE) # => %(1)
   #
   # @[Flags]
   # enum Sides
@@ -241,15 +241,15 @@ module Enum::ValueConverter(T)
   #   RIGHT
   # end
   #
-  # Enum::ValueConverter.to_json(Sides::LEFT)                # => %(1)
-  # Enum::ValueConverter.to_json(Sides::LEFT | Sides::RIGHT) # => %(3)
-  # Enum::ValueConverter.to_json(Sides::All)                 # => %(3)
-  # Enum::ValueConverter.to_json(Sides::None)                # => %(0)
+  # Enum::ValueConverter.to_nason(Sides::LEFT)                # => %(1)
+  # Enum::ValueConverter.to_nason(Sides::LEFT | Sides::RIGHT) # => %(3)
+  # Enum::ValueConverter.to_nason(Sides::All)                 # => %(3)
+  # Enum::ValueConverter.to_nason(Sides::None)                # => %(0)
   # ```
   #
-  # `Enum#to_json` offers a different serialization strategy based on the member
+  # `Enum#to_nason` offers a different serialization strategy based on the member
   # name.
-  def self.to_json(member : T, json : NASON::Builder)
+  def self.to_nason(member : T, json : NASON::Builder)
     json.scalar(member.value)
   end
 end
@@ -262,8 +262,8 @@ struct Time
   # assumes that a string holding a RFC 3339 time format will be interpreted as
   # a time value.
   #
-  # See `#from_json` for reference.
-  def to_json(json : NASON::Builder) : Nil
+  # See `#from_nason` for reference.
+  def to_nason(json : NASON::Builder) : Nil
     json.string(Time::Format::RFC_3339.format(self, fraction_digits: 0))
   end
 end
@@ -281,15 +281,15 @@ end
 #   property dates : Array(Time)
 # end
 #
-# timestamp = TimestampArray.from_json(%({"dates":[1459859781,1567628762]}))
-# timestamp.dates   # => [2016-04-05 12:36:21 UTC, 2019-09-04 20:26:02 UTC]
-# timestamp.to_json # => %({"dates":[1459859781,1567628762]})
+# timestamp = TimestampArray.from_nason(%({"dates":[1459859781,1567628762]}))
+# timestamp.dates    # => [2016-04-05 12:36:21 UTC, 2019-09-04 20:26:02 UTC]
+# timestamp.to_nason # => %({"dates":[1459859781,1567628762]})
 # ```
 module NASON::ArrayConverter(Converter)
-  def self.to_json(values : Array, builder : NASON::Builder)
+  def self.to_nason(values : Array, builder : NASON::Builder)
     builder.array do
       values.each do |value|
-        Converter.to_json(value, builder)
+        Converter.to_nason(value, builder)
       end
     end
   end
@@ -308,16 +308,16 @@ end
 #   property birthdays : Hash(String, Time)
 # end
 #
-# timestamp = TimestampHash.from_json(%({"birthdays":{"foo":1459859781,"bar":1567628762}}))
+# timestamp = TimestampHash.from_nason(%({"birthdays":{"foo":1459859781,"bar":1567628762}}))
 # timestamp.birthdays # => {"foo" => 2016-04-05 12:36:21 UTC, "bar" => 2019-09-04 20:26:02 UTC)}
-# timestamp.to_json   # => {"birthdays":{"foo":1459859781,"bar":1567628762}}
+# timestamp.to_nason  # => {"birthdays":{"foo":1459859781,"bar":1567628762}}
 # ```
 module NASON::HashValueConverter(Converter)
-  def self.to_json(values : Hash, builder : NASON::Builder)
+  def self.to_nason(values : Hash, builder : NASON::Builder)
     builder.object do
       values.each do |key, value|
         builder.field key.to_json_object_key do
-          Converter.to_json(value, builder)
+          Converter.to_nason(value, builder)
         end
       end
     end
@@ -338,12 +338,12 @@ end
 #   property birth_date : Time
 # end
 #
-# person = Person.from_json(%({"birth_date": 1459859781}))
+# person = Person.from_nason(%({"birth_date": 1459859781}))
 # person.birth_date # => 2016-04-05 12:36:21 UTC
-# person.to_json    # => %({"birth_date":1459859781})
+# person.to_nason   # => %({"birth_date":1459859781})
 # ```
 module Time::EpochConverter
-  def self.to_json(value : Time, json : NASON::Builder) : Nil
+  def self.to_nason(value : Time, json : NASON::Builder) : Nil
     json.number(value.to_unix)
   end
 end
@@ -362,12 +362,12 @@ end
 #   property value : Time
 # end
 #
-# timestamp = Timestamp.from_json(%({"value": 1459860483856}))
-# timestamp.value   # => 2016-04-05 12:48:03.856 UTC
-# timestamp.to_json # => %({"value":1459860483856})
+# timestamp = Timestamp.from_nason(%({"value": 1459860483856}))
+# timestamp.value    # => 2016-04-05 12:48:03.856 UTC
+# timestamp.to_nason # => %({"value":1459860483856})
 # ```
 module Time::EpochMillisConverter
-  def self.to_json(value : Time, json : NASON::Builder) : Nil
+  def self.to_nason(value : Time, json : NASON::Builder) : Nil
     json.number(value.to_unix_ms)
   end
 end
@@ -389,12 +389,12 @@ end
 #   property value : String
 # end
 #
-# raw = Raw.from_json(%({"value": 123456789876543212345678987654321}))
-# raw.value   # => "123456789876543212345678987654321"
-# raw.to_json # => %({"value":123456789876543212345678987654321})
+# raw = Raw.from_nason(%({"value": 123456789876543212345678987654321}))
+# raw.value    # => "123456789876543212345678987654321"
+# raw.to_nason # => %({"value":123456789876543212345678987654321})
 # ```
 module String::RawConverter
-  def self.to_json(value : String, json : NASON::Builder) : Nil
+  def self.to_nason(value : String, json : NASON::Builder) : Nil
     json.raw(value)
   end
 end

@@ -377,29 +377,29 @@ end
 
 describe "NASON mapping" do
   it "works with record" do
-    JSONAttrPoint.new(1, 2).to_json.should eq "{\"x\":1,\"y\":2}"
-    JSONAttrPoint.from_json(%({"x": 1, "y": 2})).should eq JSONAttrPoint.new(1, 2)
+    JSONAttrPoint.new(1, 2).to_nason.should eq "{\"x\":1,\"y\":2}"
+    JSONAttrPoint.from_nason(%({"x": 1, "y": 2})).should eq JSONAttrPoint.new(1, 2)
   end
 
   it "empty class" do
     e = JSONAttrEmptyClass.new
-    e.to_json.should eq "{}"
-    JSONAttrEmptyClass.from_json("{}")
+    e.to_nason.should eq "{}"
+    JSONAttrEmptyClass.from_nason("{}")
   end
 
   it "empty class with unmapped" do
-    JSONAttrEmptyClassWithUnmapped.from_json(%({"name": "John", "age": 30})).json_unmapped.should eq({"name" => "John", "age" => 30})
+    JSONAttrEmptyClassWithUnmapped.from_nason(%({"name": "John", "age": 30})).json_unmapped.should eq({"name" => "John", "age" => 30})
   end
 
   it "parses person" do
-    person = JSONAttrPerson.from_json(%({"name": "John", "age": 30}))
+    person = JSONAttrPerson.from_nason(%({"name": "John", "age": 30}))
     person.should be_a(JSONAttrPerson)
     person.name.should eq("John")
     person.age.should eq(30)
   end
 
   it "parses person without age" do
-    person = JSONAttrPerson.from_json(%({"name": "John"}))
+    person = JSONAttrPerson.from_nason(%({"name": "John"}))
     person.should be_a(JSONAttrPerson)
     person.name.should eq("John")
     person.name.size.should eq(4) # This verifies that name is not nilable
@@ -407,24 +407,24 @@ describe "NASON mapping" do
   end
 
   it "parses array of people" do
-    people = Array(JSONAttrPerson).from_json(%([{"name": "John"}, {"name": "Doe"}]))
+    people = Array(JSONAttrPerson).from_nason(%([{"name": "John"}, {"name": "Doe"}]))
     people.size.should eq(2)
   end
 
   it "works with class with two fields" do
-    person1 = JSONAttrPersonWithTwoFieldInInitialize.from_json(%({"name": "John", "age": 30}))
+    person1 = JSONAttrPersonWithTwoFieldInInitialize.from_nason(%({"name": "John", "age": 30}))
     person2 = JSONAttrPersonWithTwoFieldInInitialize.new("John", 30)
     person1.should eq person2
   end
 
-  it "does to_json" do
-    person = JSONAttrPerson.from_json(%({"name": "John", "age": 30}))
-    person2 = JSONAttrPerson.from_json(person.to_json)
+  it "does to_nason" do
+    person = JSONAttrPerson.from_nason(%({"name": "John", "age": 30}))
+    person2 = JSONAttrPerson.from_nason(person.to_nason)
     person2.should eq(person)
   end
 
   it "parses person with unknown attributes" do
-    person = JSONAttrPerson.from_json(%({"name": "John", "age": 30, "foo": "bar"}))
+    person = JSONAttrPerson.from_nason(%({"name": "John", "age": 30, "foo": "bar"}))
     person.should be_a(JSONAttrPerson)
     person.name.should eq("John")
     person.age.should eq(30)
@@ -436,7 +436,7 @@ describe "NASON mapping" do
         parsing StrictJSONAttrPerson
       MSG
     ex = expect_raises ::NASON::SerializableError, error_message do
-      StrictJSONAttrPerson.from_json <<-NASON
+      StrictJSONAttrPerson.from_nason <<-NASON
         {
           "name": "John",
           "age": 30,
@@ -448,18 +448,18 @@ describe "NASON mapping" do
   end
 
   it "should parse extra fields (JSONAttrPersonExtraFields with on_unknown_json_attribute)" do
-    person = JSONAttrPersonExtraFields.from_json(%({"name": "John", "age": 30, "x": "1", "y": 2, "z": [1,2,3]}))
+    person = JSONAttrPersonExtraFields.from_nason(%({"name": "John", "age": 30, "x": "1", "y": 2, "z": [1,2,3]}))
     person.name.should eq("John")
     person.age.should eq(30)
     person.json_unmapped.should eq({"x" => "1", "y" => 2_i64, "z" => [1, 2, 3]})
   end
 
   it "should to store extra fields (JSONAttrPersonExtraFields with on_to_json)" do
-    person = JSONAttrPersonExtraFields.from_json(%({"name": "John", "age": 30, "x": "1", "y": 2, "z": [1,2,3]}))
+    person = JSONAttrPersonExtraFields.from_nason(%({"name": "John", "age": 30, "x": "1", "y": 2, "z": [1,2,3]}))
     person.name = "John1"
     person.json_unmapped.delete("y")
     person.json_unmapped["q"] = NASON::Any.new("w")
-    person.to_json.should eq "{\"name\":\"John1\",\"age\":30,\"x\":\"1\",\"z\":[1,2,3],\"q\":\"w\"}"
+    person.to_nason.should eq "{\"name\":\"John1\",\"age\":30,\"x\":\"1\",\"z\":[1,2,3],\"q\":\"w\"}"
   end
 
   it "raises if non-nilable attribute is nil" do
@@ -468,7 +468,7 @@ describe "NASON mapping" do
         parsing JSONAttrPerson at line 1, column 1
       MSG
     ex = expect_raises ::NASON::SerializableError, error_message do
-      JSONAttrPerson.from_json(%({"age": 30}))
+      JSONAttrPerson.from_nason(%({"age": 30}))
     end
     ex.location.should eq({1, 1})
   end
@@ -479,7 +479,7 @@ describe "NASON mapping" do
         parsing StrictJSONAttrPerson at line 0, column 0
       MSG
     ex = expect_raises ::NASON::SerializableError, error_message do
-      StrictJSONAttrPerson.from_json <<-NASON
+      StrictJSONAttrPerson.from_nason <<-NASON
         "foo"
         NASON
     end
@@ -491,7 +491,7 @@ describe "NASON mapping" do
       Couldn't parse (Int32 | Nil) from "foo" at line 3, column 10
       MSG
     ex = expect_raises ::NASON::SerializableError, error_message do
-      StrictJSONAttrPerson.from_json <<-NASON
+      StrictJSONAttrPerson.from_nason <<-NASON
         {
           "name": "John",
           "age": "foo",
@@ -502,27 +502,27 @@ describe "NASON mapping" do
     ex.location.should eq({3, 10})
   end
 
-  it "doesn't emit null by default when doing to_json" do
-    person = JSONAttrPerson.from_json(%({"name": "John"}))
-    (person.to_json =~ /age/).should be_falsey
+  it "doesn't emit null by default when doing to_nason" do
+    person = JSONAttrPerson.from_nason(%({"name": "John"}))
+    (person.to_nason =~ /age/).should be_falsey
   end
 
   it "doesn't raises on false value when not-nil" do
-    json = JSONAttrWithBool.from_json(%({"value": false}))
+    json = JSONAttrWithBool.from_nason(%({"value": false}))
     json.value.should be_false
   end
 
   it "parses UUID" do
-    uuid = JSONAttrWithUUID.from_json(%({"value": "ba714f86-cac6-42c7-8956-bcf5105e1b81"}))
+    uuid = JSONAttrWithUUID.from_nason(%({"value": "ba714f86-cac6-42c7-8956-bcf5105e1b81"}))
     uuid.should be_a(JSONAttrWithUUID)
     uuid.value.should eq(UUID.new("ba714f86-cac6-42c7-8956-bcf5105e1b81"))
   end
 
   it "parses json with Time::Format converter" do
-    json = JSONAttrWithTime.from_json(%({"value": "2014-10-31 23:37:16"}))
+    json = JSONAttrWithTime.from_nason(%({"value": "2014-10-31 23:37:16"}))
     json.value.should be_a(Time)
     json.value.to_s.should eq("2014-10-31 23:37:16 UTC")
-    json.to_json.should eq(%({"value":"2014-10-31 23:37:16"}))
+    json.to_nason.should eq(%({"value":"2014-10-31 23:37:16"}))
   end
 
   it "allows setting a nilable property to nil" do
@@ -532,7 +532,7 @@ describe "NASON mapping" do
   end
 
   it "parses simple mapping" do
-    person = JSONAttrWithSimpleMapping.from_json(%({"name": "John", "age": 30}))
+    person = JSONAttrWithSimpleMapping.from_nason(%({"name": "John", "age": 30}))
     person.should be_a(JSONAttrWithSimpleMapping)
     person.name.should eq("John")
     person.age.should eq(30)
@@ -540,43 +540,43 @@ describe "NASON mapping" do
 
   it "outputs with converter when nilable" do
     json = JSONAttrWithNilableTime.new
-    json.to_json.should eq("{}")
+    json.to_nason.should eq("{}")
   end
 
   it "outputs NASON with properties key" do
     input = {
       properties: {"foo" => "bar"},
-    }.to_json
-    json = JSONAttrWithPropertiesKey.from_json(input)
-    json.to_json.should eq(input)
+    }.to_nason
+    json = JSONAttrWithPropertiesKey.from_nason(input)
+    json.to_nason.should eq(input)
   end
 
   it "parses json with keywords" do
-    json = JSONAttrWithKeywordsMapping.from_json(%({"end": 1, "abstract": 2}))
+    json = JSONAttrWithKeywordsMapping.from_nason(%({"end": 1, "abstract": 2}))
     json.end.should eq(1)
     json.abstract.should eq(2)
   end
 
   it "parses json with any" do
-    json = JSONAttrWithAny.from_json(%({"name": "Hi", "any": [{"x": 1}, 2, "hey", true, false, 1.5, null]}))
+    json = JSONAttrWithAny.from_nason(%({"name": "Hi", "any": [{"x": 1}, 2, "hey", true, false, 1.5, null]}))
     json.name.should eq("Hi")
     json.any.raw.should eq([{"x" => 1}, 2, "hey", true, false, 1.5, NULL])
-    json.to_json.should eq(%({"name":"Hi","any":[{"x":1},2,"hey",true,false,1.5,null]}))
+    json.to_nason.should eq(%({"name":"Hi","any":[{"x":1},2,"hey",true,false,1.5,null]}))
   end
 
   it "parses json with problematic keys" do
-    json = JSONAttrWithProblematicKeys.from_json(%({"key": 1, "pull": 2}))
+    json = JSONAttrWithProblematicKeys.from_nason(%({"key": 1, "pull": 2}))
     json.key.should eq(1)
     json.pull.should eq(2)
   end
 
   it "parses json array as set" do
-    json = JSONAttrWithSet.from_json(%({"set": ["a", "a", "b"]}))
+    json = JSONAttrWithSet.from_nason(%({"set": ["a", "a", "b"]}))
     json.set.should eq(Set(String){"a", "b"})
   end
 
   it "allows small types of integer" do
-    json = JSONAttrWithSmallIntegers.from_json(%({"foo": 23, "bar": 7}))
+    json = JSONAttrWithSmallIntegers.from_nason(%({"foo": 23, "bar": 7}))
 
     json.foo.should eq(23)
     typeof(json.foo).should eq(Int16)
@@ -587,48 +587,48 @@ describe "NASON mapping" do
 
   describe "parses json with defaults" do
     it "mixed" do
-      json = JSONAttrWithDefaults.from_json(%({"a":1,"b":"bla"}))
+      json = JSONAttrWithDefaults.from_nason(%({"a":1,"b":"bla"}))
       json.a.should eq 1
       json.b.should eq "bla"
 
-      json = JSONAttrWithDefaults.from_json(%({"a":1}))
+      json = JSONAttrWithDefaults.from_nason(%({"a":1}))
       json.a.should eq 1
       json.b.should eq "Haha"
 
-      json = JSONAttrWithDefaults.from_json(%({"b":"bla"}))
+      json = JSONAttrWithDefaults.from_nason(%({"b":"bla"}))
       json.a.should eq 11
       json.b.should eq "bla"
 
-      json = JSONAttrWithDefaults.from_json(%({}))
+      json = JSONAttrWithDefaults.from_nason(%({}))
       json.a.should eq 11
       json.b.should eq "Haha"
 
       # Default values should only be used when the property is nilable/missing
-      json = JSONAttrWithDefaults.from_json(%({"a":null,"b":null}))
+      json = JSONAttrWithDefaults.from_nason(%({"a":null,"b":null}))
       json.a.should eq NULL
       json.b.should eq NULL
     end
 
     it "bool" do
-      json = JSONAttrWithDefaults.from_json(%({}))
+      json = JSONAttrWithDefaults.from_nason(%({}))
       json.c.should eq true
       typeof(json.c).should eq Bool
       json.d.should eq false
       typeof(json.d).should eq Bool
 
-      json = JSONAttrWithDefaults.from_json(%({"c":false}))
+      json = JSONAttrWithDefaults.from_nason(%({"c":false}))
       json.c.should eq false
-      json = JSONAttrWithDefaults.from_json(%({"c":true}))
+      json = JSONAttrWithDefaults.from_nason(%({"c":true}))
       json.c.should eq true
 
-      json = JSONAttrWithDefaults.from_json(%({"d":false}))
+      json = JSONAttrWithDefaults.from_nason(%({"d":false}))
       json.d.should eq false
-      json = JSONAttrWithDefaults.from_json(%({"d":true}))
+      json = JSONAttrWithDefaults.from_nason(%({"d":true}))
       json.d.should eq true
     end
 
     it "with nilable" do
-      json = JSONAttrWithDefaults.from_json(%({}))
+      json = JSONAttrWithDefaults.from_nason(%({}))
 
       json.e.should eq false
       typeof(json.e).should eq(Bool | Nil)
@@ -639,128 +639,128 @@ describe "NASON mapping" do
       json.g.should eq nil
       typeof(json.g).should eq(Int32 | Nil)
 
-      json = JSONAttrWithDefaults.from_json(%({"e":false}))
+      json = JSONAttrWithDefaults.from_nason(%({"e":false}))
       json.e.should eq false
-      json = JSONAttrWithDefaults.from_json(%({"e":true}))
+      json = JSONAttrWithDefaults.from_nason(%({"e":true}))
       json.e.should eq true
     end
 
     it "create new array every time" do
-      json = JSONAttrWithDefaults.from_json(%({}))
+      json = JSONAttrWithDefaults.from_nason(%({}))
       json.h.should eq [1, 2, 3]
       json.h << 4
       json.h.should eq [1, 2, 3, 4]
 
-      json = JSONAttrWithDefaults.from_json(%({}))
+      json = JSONAttrWithDefaults.from_nason(%({}))
       json.h.should eq [1, 2, 3]
     end
   end
 
   it "uses Time::EpochConverter" do
     string = %({"value":1459859781})
-    json = JSONAttrWithTimeEpoch.from_json(string)
+    json = JSONAttrWithTimeEpoch.from_nason(string)
     json.value.should be_a(Time)
     json.value.should eq(Time.unix(1_459_859_781))
-    json.to_json.should eq(string)
+    json.to_nason.should eq(string)
   end
 
   it "uses Time::EpochMillisConverter" do
     string = %({"value":1459860483856})
-    json = JSONAttrWithTimeEpochMillis.from_json(string)
+    json = JSONAttrWithTimeEpochMillis.from_nason(string)
     json.value.should be_a(Time)
     json.value.should eq(Time.unix_ms(1_459_860_483_856))
-    json.to_json.should eq(string)
+    json.to_nason.should eq(string)
   end
 
   it "parses raw value from int" do
     string = %({"value":123456789123456789123456789123456789})
-    json = JSONAttrWithRaw.from_json(string)
+    json = JSONAttrWithRaw.from_nason(string)
     json.value.should eq("123456789123456789123456789123456789")
-    json.to_json.should eq(string)
+    json.to_nason.should eq(string)
   end
 
   it "parses raw value from float" do
     string = %({"value":123456789123456789.123456789123456789})
-    json = JSONAttrWithRaw.from_json(string)
+    json = JSONAttrWithRaw.from_nason(string)
     json.value.should eq("123456789123456789.123456789123456789")
-    json.to_json.should eq(string)
+    json.to_nason.should eq(string)
   end
 
   it "parses raw value from object" do
     string = %({"value":[null,true,false,{"x":[1,1.5]}]})
-    json = JSONAttrWithRaw.from_json(string)
+    json = JSONAttrWithRaw.from_nason(string)
     json.value.should eq(%([null,true,false,{"x":[1,1.5]}]))
-    json.to_json.should eq(string)
+    json.to_nason.should eq(string)
   end
 
   it "parses with root" do
     json = %({"result":{"heroes":[{"name":"Batman"}]}})
-    result = JSONAttrWithRoot.from_json(json)
+    result = JSONAttrWithRoot.from_nason(json)
     result.result.should be_a(Array(JSONAttrPerson))
     result.result.first.name.should eq "Batman"
-    result.to_json.should eq(json)
+    result.to_nason.should eq(json)
   end
 
   # TODO: Figure out why result is different
   it "parses with nilable root" do
     json = %({"result":null})
-    result = JSONAttrWithNilableRoot.from_json(json)
+    result = JSONAttrWithNilableRoot.from_nason(json)
     result.result.should eq NULL
-    result.to_json.should eq %({"result":{"heroes":null}})
+    result.to_nason.should eq %({"result":{"heroes":null}})
   end
 
   it "parses with nilable root" do
     result = JSONAttrWithNilableRoot.new(nil)
     result.result.should be_nil
-    result.to_json.should eq %({})
+    result.to_nason.should eq %({})
   end
 
   it "parses with nilable root" do
     json = %({"result":{"heroes":null}})
-    result = JSONAttrWithNilableRoot.from_json(json)
+    result = JSONAttrWithNilableRoot.from_nason(json)
     result.result.should eq NULL
-    result.to_json.should eq %({"result":{"heroes":null}})
+    result.to_nason.should eq %({"result":{"heroes":null}})
   end
 
   # TODO: Figure out why result is different
   it "parses with nilable root and emit null" do
     json = %({"result":null})
-    result = JSONAttrWithNilableRootEmitNull.from_json(json)
+    result = JSONAttrWithNilableRootEmitNull.from_nason(json)
     result.result.should eq NULL
-    result.to_json.should eq %({"result":{"heroes":null}})
+    result.to_nason.should eq %({"result":{"heroes":null}})
   end
 
   it "parses nilable union" do
-    obj = JSONAttrWithNilableUnion.from_json(%({"value": 1}))
+    obj = JSONAttrWithNilableUnion.from_nason(%({"value": 1}))
     obj.value.should eq(1)
-    obj.to_json.should eq(%({"value":1}))
+    obj.to_nason.should eq(%({"value":1}))
 
-    obj = JSONAttrWithNilableUnion.from_json(%({"value": null}))
+    obj = JSONAttrWithNilableUnion.from_nason(%({"value": null}))
     obj.value.should eq NULL
-    obj.to_json.should eq(%({"value":null}))
+    obj.to_nason.should eq(%({"value":null}))
 
-    obj = JSONAttrWithNilableUnion.from_json(%({}))
+    obj = JSONAttrWithNilableUnion.from_nason(%({}))
     obj.value.should be_nil
-    obj.to_json.should eq(%({}))
+    obj.to_nason.should eq(%({}))
   end
 
   it "parses nilable union2" do
-    obj = JSONAttrWithNilableUnion2.from_json(%({"value": 1}))
+    obj = JSONAttrWithNilableUnion2.from_nason(%({"value": 1}))
     obj.value.should eq(1)
-    obj.to_json.should eq(%({"value":1}))
+    obj.to_nason.should eq(%({"value":1}))
 
-    obj = JSONAttrWithNilableUnion2.from_json(%({"value": null}))
+    obj = JSONAttrWithNilableUnion2.from_nason(%({"value": null}))
     obj.value.should eq NULL
-    obj.to_json.should eq(%({"value":null}))
+    obj.to_nason.should eq(%({"value":null}))
 
-    obj = JSONAttrWithNilableUnion2.from_json(%({}))
+    obj = JSONAttrWithNilableUnion2.from_nason(%({}))
     obj.value.should be_nil
-    obj.to_json.should eq(%({}))
+    obj.to_nason.should eq(%({}))
   end
 
   describe "with query attributes" do
     it "defines query getter" do
-      json = JSONAttrWithQueryAttributes.from_json(%({"foo": true}))
+      json = JSONAttrWithQueryAttributes.from_nason(%({"foo": true}))
       json.foo?.should be_true
       json.bar?.should be_false
     end
@@ -774,16 +774,16 @@ describe "NASON mapping" do
     end
 
     it "defines non-query setter and presence methods" do
-      json = JSONAttrWithQueryAttributes.from_json(%({"foo": false}))
+      json = JSONAttrWithQueryAttributes.from_nason(%({"foo": false}))
       json.bar = true
       json.bar?.should be_true
     end
 
     it "maps non-query attributes" do
-      json = JSONAttrWithQueryAttributes.from_json(%({"foo": false, "is_bar": false}))
+      json = JSONAttrWithQueryAttributes.from_nason(%({"foo": false, "is_bar": false}))
       json.bar?.should be_false
       json.bar = true
-      json.to_json.should eq(%({"foo":false,"is_bar":true}))
+      json.to_nason.should eq(%({"foo":false,"is_bar":true}))
     end
 
     it "raises if non-nilable attribute is nil" do
@@ -792,25 +792,25 @@ describe "NASON mapping" do
           parsing JSONAttrWithQueryAttributes at line 1, column 1
         MSG
       ex = expect_raises ::NASON::SerializableError, error_message do
-        JSONAttrWithQueryAttributes.from_json(%({"is_bar": true}))
+        JSONAttrWithQueryAttributes.from_nason(%({"is_bar": true}))
       end
       ex.location.should eq({1, 1})
     end
   end
 
   describe "work with module and inheritance" do
-    it { JSONAttrModuleTest.from_json(%({"phoo": 20})).to_tuple.should eq({10, 20}) }
-    it { JSONAttrModuleTest.from_json(%({"phoo": 20})).to_tuple.should eq({10, 20}) }
-    it { JSONAttrModuleTest2.from_json(%({"phoo": 20, "bar": 30})).to_tuple.should eq({10, 20, 30}) }
-    it { JSONAttrModuleTest2.from_json(%({"bar": 30, "moo": 40})).to_tuple.should eq({40, 15, 30}) }
+    it { JSONAttrModuleTest.from_nason(%({"phoo": 20})).to_tuple.should eq({10, 20}) }
+    it { JSONAttrModuleTest.from_nason(%({"phoo": 20})).to_tuple.should eq({10, 20}) }
+    it { JSONAttrModuleTest2.from_nason(%({"phoo": 20, "bar": 30})).to_tuple.should eq({10, 20, 30}) }
+    it { JSONAttrModuleTest2.from_nason(%({"bar": 30, "moo": 40})).to_tuple.should eq({40, 15, 30}) }
   end
 
   it "works together with yaml" do
     person = JSONAttrPersonWithYAML.new("Vasya", 30)
-    person.to_json.should eq "{\"name\":\"Vasya\",\"age\":30}"
+    person.to_nason.should eq "{\"name\":\"Vasya\",\"age\":30}"
     person.to_yaml.should eq "---\nname: Vasya\nage: 30\n"
 
-    JSONAttrPersonWithYAML.from_json(person.to_json).should eq person
+    JSONAttrPersonWithYAML.from_nason(person.to_nason).should eq person
     JSONAttrPersonWithYAML.from_yaml(person.to_yaml).should eq person
   end
 
@@ -818,30 +818,30 @@ describe "NASON mapping" do
     person = JSONAttrPersonWithYAMLInitializeHook.new("Vasya", 30)
     person.msg.should eq "Hello Vasya"
 
-    person.to_json.should eq "{\"name\":\"Vasya\",\"age\":30}"
+    person.to_nason.should eq "{\"name\":\"Vasya\",\"age\":30}"
     person.to_yaml.should eq "---\nname: Vasya\nage: 30\n"
 
-    JSONAttrPersonWithYAMLInitializeHook.from_json(person.to_json).msg.should eq "Hello Vasya"
+    JSONAttrPersonWithYAMLInitializeHook.from_nason(person.to_nason).msg.should eq "Hello Vasya"
     JSONAttrPersonWithYAMLInitializeHook.from_yaml(person.to_yaml).msg.should eq "Hello Vasya"
   end
 
   it "json with selective serialization" do
     person = JSONAttrPersonWithSelectiveSerialization.new("Vasya", "P@ssw0rd")
-    person.to_json.should eq "{\"name\":\"Vasya\",\"generated\":\"generated-internally\"}"
+    person.to_nason.should eq "{\"name\":\"Vasya\",\"generated\":\"generated-internally\"}"
 
     person_json = "{\"name\":\"Vasya\",\"generated\":\"should not set\",\"password\":\"update\"}"
-    person = JSONAttrPersonWithSelectiveSerialization.from_json(person_json)
+    person = JSONAttrPersonWithSelectiveSerialization.from_nason(person_json)
     person.generated.should eq "generated-internally"
     person.password.should eq "update"
   end
 
   describe "use_json_discriminator" do
     it "deserializes with discriminator" do
-      point = JSONShape.from_json(%({"type": "point", "x": 1, "y": 2})).as(JSONPoint)
+      point = JSONShape.from_nason(%({"type": "point", "x": 1, "y": 2})).as(JSONPoint)
       point.x.should eq(1)
       point.y.should eq(2)
 
-      circle = JSONShape.from_json(%({"type": "circle", "x": 1, "y": 2, "radius": 3})).as(JSONCircle)
+      circle = JSONShape.from_nason(%({"type": "circle", "x": 1, "y": 2, "radius": 3})).as(JSONCircle)
       circle.x.should eq(1)
       circle.y.should eq(2)
       circle.radius.should eq(3)
@@ -849,37 +849,37 @@ describe "NASON mapping" do
 
     it "raises if missing discriminator" do
       expect_raises(::NASON::SerializableError, "Missing JSON discriminator field 'type'") do
-        JSONShape.from_json("{}")
+        JSONShape.from_nason("{}")
       end
     end
 
     it "raises if unknown discriminator value" do
       expect_raises(::NASON::SerializableError, %(Unknown 'type' discriminator value: "unknown")) do
-        JSONShape.from_json(%({"type": "unknown"}))
+        JSONShape.from_nason(%({"type": "unknown"}))
       end
     end
 
     it "deserializes with variable discriminator value type" do
-      object_number = JSONVariableDiscriminatorValueType.from_json(%({"type": 0}))
+      object_number = JSONVariableDiscriminatorValueType.from_nason(%({"type": 0}))
       object_number.should be_a(JSONVariableDiscriminatorNumber)
 
-      object_string = JSONVariableDiscriminatorValueType.from_json(%({"type": "1"}))
+      object_string = JSONVariableDiscriminatorValueType.from_nason(%({"type": "1"}))
       object_string.should be_a(JSONVariableDiscriminatorString)
 
-      object_bool = JSONVariableDiscriminatorValueType.from_json(%({"type": true}))
+      object_bool = JSONVariableDiscriminatorValueType.from_nason(%({"type": true}))
       object_bool.should be_a(JSONVariableDiscriminatorBool)
 
-      object_enum = JSONVariableDiscriminatorValueType.from_json(%({"type": 4}))
+      object_enum = JSONVariableDiscriminatorValueType.from_nason(%({"type": 4}))
       object_enum.should be_a(JSONVariableDiscriminatorEnum)
 
-      object_enum = JSONVariableDiscriminatorValueType.from_json(%({"type": 18}))
+      object_enum = JSONVariableDiscriminatorValueType.from_nason(%({"type": 18}))
       object_enum.should be_a(JSONVariableDiscriminatorEnum8)
     end
   end
 
   describe "namespaced classes" do
     it "lets default values use the object's own namespace" do
-      request = JSONNamespace::FooRequest.from_json(%({"foo":{}}))
+      request = JSONNamespace::FooRequest.from_nason(%({"foo":{}}))
       request.foo.id.should eq "id:foo"
       request.bar.id.should eq "id:bar"
     end

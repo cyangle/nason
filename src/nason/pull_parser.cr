@@ -263,7 +263,7 @@ class NASON::PullParser
     when .int?, .float?
       @raw_value.tap { read_next }
     when .string?
-      @string_value.to_json.tap { read_next }
+      @string_value.to_nason.tap { read_next }
     when .begin_array?
       NASON.build { |json| read_raw(json) }
     when .begin_object?

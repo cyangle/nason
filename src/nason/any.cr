@@ -279,8 +279,8 @@ struct NASON::Any
   def_hash raw
 
   # :nodoc:
-  def to_json(json : NASON::Builder)
-    raw.to_json(json)
+  def to_nason(json : NASON::Builder)
+    raw.to_nason(json)
   end
 
   def to_yaml(yaml : YAML::Nodes::Builder) : Nil

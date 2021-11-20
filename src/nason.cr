@@ -2,32 +2,32 @@
 #
 # ### General type-safe interface
 #
-# The general type-safe interface for parsing NASON is to invoke `T.from_json` on a
+# The general type-safe interface for parsing NASON is to invoke `T.from_nason` on a
 # target type `T` and pass either a `String` or `IO` as an argument.
 #
 # ```
 # require "nason"
 #
 # json_text = %([1, 2, 3])
-# Array(Int32).from_json(json_text) # => [1, 2, 3]
+# Array(Int32).from_nason(json_text) # => [1, 2, 3]
 #
 # json_text = %({"x": 1, "y": 2})
-# Hash(String, Int32).from_json(json_text) # => {"x" => 1, "y" => 2}
+# Hash(String, Int32).from_nason(json_text) # => {"x" => 1, "y" => 2}
 # ```
 #
-# Serializing is achieved by invoking `to_json`, which returns a `String`, or
-# `to_json(io : IO)`, which will stream the NASON to an `IO`.
+# Serializing is achieved by invoking `to_nason`, which returns a `String`, or
+# `to_nason(io : IO)`, which will stream the NASON to an `IO`.
 #
 # ```
 # require "nason"
 #
-# [1, 2, 3].to_json            # => "[1,2,3]"
-# {"x" => 1, "y" => 2}.to_json # => "{\"x\":1,\"y\":2}"
+# [1, 2, 3].to_nason            # => "[1,2,3]"
+# {"x" => 1, "y" => 2}.to_nason # => "{\"x\":1,\"y\":2}"
 # ```
 #
 # Most types in the standard library implement these methods. For user-defined types
 # you can define a `self.new(pull : NASON::PullParser)` for parsing and
-# `to_json(builder : NASON::Builder)` for serializing. The following sections
+# `to_nason(builder : NASON::Builder)` for serializing. The following sections
 # show convenient ways to do this using `NASON::Serializable`.
 #
 # NOTE: NASON object keys are always strings but they can still be parsed
@@ -41,9 +41,9 @@
 # require "nason"
 #
 # json_text = %({"1": 2, "3": 4})
-# Hash(Int32, Int32).from_json(json_text) # => {1 => 2, 3 => 4}
+# Hash(Int32, Int32).from_nason(json_text) # => {1 => 2, 3 => 4}
 #
-# {1.5 => 2}.to_json # => "{\"1.5\":2}"
+# {1.5 => 2}.to_nason # => "{\"1.5\":2}"
 # ```
 #
 # ### Parsing with `NASON.parse`
@@ -106,10 +106,10 @@
 # string # => %<{"name":"foo","values":[1,2,3]}>
 # ```
 #
-# ### Generating with `to_json`
+# ### Generating with `to_nason`
 #
-# `to_json`, `to_json(IO)` and `to_json(NASON::Builder)` methods are provided
-# for primitive types, but you need to define `to_json(NASON::Builder)`
+# `to_nason`, `to_nason(IO)` and `to_nason(NASON::Builder)` methods are provided
+# for primitive types, but you need to define `to_nason(NASON::Builder)`
 # for custom objects, either manually or using `NASON::Serializable`.
 module NASON
   VERSION = "0.2.4"
@@ -143,5 +143,3 @@ require "./nason/*"
 require "./big/*"
 require "./uuid/*"
 require "./file.cr"
-require "./oauth/*"
-require "./oauth2/access_token/*"

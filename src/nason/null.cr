@@ -95,7 +95,7 @@ struct Null
     pull.read_null
   end
 
-  def to_json(nson : NASON::Builder) : Nil
+  def to_nason(nson : NASON::Builder) : Nil
     nson.null
   end
 

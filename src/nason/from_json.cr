@@ -5,10 +5,10 @@
 # method.
 #
 # ```
-# Int32.from_json("1")                # => 1
-# Array(Int32).from_json("[1, 2, 3]") # => [1, 2, 3]
+# Int32.from_nason("1")                # => 1
+# Array(Int32).from_nason("[1, 2, 3]") # => [1, 2, 3]
 # ```
-def Object.from_json(string_or_io)
+def Object.from_nason(string_or_io)
   parser = NASON::PullParser.new(string_or_io)
   new parser
 end
@@ -19,9 +19,9 @@ end
 # the value to deserialize.
 #
 # ```
-# Int32.from_json(%({"main": 1}), root: "main") # => 1
+# Int32.from_nason(%({"main": 1}), root: "main") # => 1
 # ```
-def Object.from_json(string_or_io, root : String)
+def Object.from_nason(string_or_io, root : String)
   parser = NASON::PullParser.new(string_or_io)
   parser.on_key!(root) do
     new parser
@@ -36,7 +36,7 @@ end
 # ```
 # require "nason"
 #
-# Array(Int32).from_json("[1, 2, 3]") do |element|
+# Array(Int32).from_nason("[1, 2, 3]") do |element|
 #   puts element
 # end
 # ```
@@ -50,7 +50,7 @@ end
 # ```
 #
 # To parse and get an `Array`, use the block-less overload.
-def Array.from_json(string_or_io) : Nil
+def Array.from_nason(string_or_io) : Nil
   parser = NASON::PullParser.new(string_or_io)
   new(parser) do |element|
     yield element
@@ -58,7 +58,7 @@ def Array.from_json(string_or_io) : Nil
   nil
 end
 
-def Deque.from_json(string_or_io) : Nil
+def Deque.from_nason(string_or_io) : Nil
   parser = NASON::PullParser.new(string_or_io)
   new(parser) do |element|
     yield element
@@ -245,7 +245,7 @@ end
 
 # Reads a serialized enum member by name from *pull*.
 #
-# See `#to_json` for reference.
+# See `#to_nason` for reference.
 #
 # Raises `NASON::ParseException` if the deserialization fails.
 def Enum.new(pull : NASON::PullParser)
@@ -262,7 +262,7 @@ end
 
 # Converter for value-based serialization and deserialization of enum type `T`.
 #
-# The serialization format of `Enum#to_json` and `Enum.from_json` is based on
+# The serialization format of `Enum#to_nason` and `Enum.from_nason` is based on
 # the member name. This converter offers an alternative based on the member value.
 #
 # This converter can be used for its standalone serialization methods as a
@@ -291,8 +291,8 @@ end
 # end
 #
 # foo = Foo.new(MyEnum::ONE)
-# foo.to_json # => %({"foo":1})
-# foo.to_yaml # => %(---\nfoo: 1\n)
+# foo.to_nason # => %({"foo":1})
+# foo.to_yaml  # => %(---\nfoo: 1\n)
 # ```
 #
 # NOTE: Automatically assigned enum values are subject to change when the order
@@ -302,15 +302,15 @@ end
 # members.
 module Enum::ValueConverter(T)
   def self.new(pull : NASON::PullParser) : T
-    from_json(pull)
+    from_nason(pull)
   end
 
   # Reads a serialized enum member by value from *pull*.
   #
-  # See `.to_json` for reference.
+  # See `.to_nason` for reference.
   #
   # Raises `NASON::ParseException` if the deserialization fails.
-  def self.from_json(pull : NASON::PullParser) : T
+  def self.from_nason(pull : NASON::PullParser) : T
     T.from_value?(pull.read_int) || pull.raise "Unknown enum #{T} value: #{pull.int_value}"
   end
 end
@@ -361,7 +361,7 @@ def Union.new(pull : NASON::PullParser)
       string = pull.read_raw
       {% for type in non_primitives %}
         begin
-          return {{type}}.from_json(string)
+          return {{type}}.from_nason(string)
         rescue NASON::ParseException
           # Ignore
         end
@@ -378,56 +378,56 @@ end
 # assumes that a string holding a ISO 8601 time format can be interpreted as a
 # time value.
 #
-# See `#to_json` for reference.
+# See `#to_nason` for reference.
 def Time.new(pull : NASON::PullParser)
   Time::Format::ISO_8601_DATE_TIME.parse(pull.read_string)
 end
 
 struct Time::Format
-  def from_json(pull : NASON::PullParser) : Time
+  def from_nason(pull : NASON::PullParser) : Time
     string = pull.read_string
     parse(string, Time::Location::UTC)
   end
 end
 
 module NASON::ArrayConverter(Converter)
-  def self.from_json(pull : NASON::PullParser)
-    ary = Array(typeof(Converter.from_json(pull))).new
+  def self.from_nason(pull : NASON::PullParser)
+    ary = Array(typeof(Converter.from_nason(pull))).new
     pull.read_array do
-      ary << Converter.from_json(pull)
+      ary << Converter.from_nason(pull)
     end
     ary
   end
 end
 
 module NASON::HashValueConverter(Converter)
-  def self.from_json(pull : NASON::PullParser)
-    hash = Hash(String, typeof(Converter.from_json(pull))).new
+  def self.from_nason(pull : NASON::PullParser)
+    hash = Hash(String, typeof(Converter.from_nason(pull))).new
     pull.read_object do |key, key_location|
       parsed_key = String.from_json_object_key?(key)
       unless parsed_key
         raise NASON::ParseException.new("Can't convert #{key.inspect} into String", *key_location)
       end
-      hash[parsed_key] = Converter.from_json(pull)
+      hash[parsed_key] = Converter.from_nason(pull)
     end
     hash
   end
 end
 
 module Time::EpochConverter
-  def self.from_json(value : NASON::PullParser) : Time
+  def self.from_nason(value : NASON::PullParser) : Time
     Time.unix(value.read_int)
   end
 end
 
 module Time::EpochMillisConverter
-  def self.from_json(value : NASON::PullParser) : Time
+  def self.from_nason(value : NASON::PullParser) : Time
     Time.unix_ms(value.read_int)
   end
 end
 
 module String::RawConverter
-  def self.from_json(value : NASON::PullParser) : String
+  def self.from_nason(value : NASON::PullParser) : String
     value.read_raw
   end
 end

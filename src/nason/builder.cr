@@ -254,7 +254,7 @@ class NASON::Builder
   # `to_s` on it.
   def field(name, value)
     string(name)
-    value.to_json(self)
+    value.to_nason(self)
   end
 
   # Writes an object's field and then invokes the block.

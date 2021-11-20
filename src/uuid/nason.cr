@@ -15,7 +15,7 @@ struct UUID
   #   property id : UUID
   # end
   #
-  # example = Example.from_json(%({"id": "ba714f86-cac6-42c7-8956-bcf5105e1b81"}))
+  # example = Example.from_nason(%({"id": "ba714f86-cac6-42c7-8956-bcf5105e1b81"}))
   # example.id # => UUID(ba714f86-cac6-42c7-8956-bcf5105e1b81)
   # ```
   def self.new(pull : NASON::PullParser)
@@ -28,9 +28,9 @@ struct UUID
   #
   # ```
   # uuid = UUID.new("87b3042b-9b9a-41b7-8b15-a93d3f17025e")
-  # uuid.to_json # => "\"87b3042b-9b9a-41b7-8b15-a93d3f17025e\""
+  # uuid.to_nason # => "\"87b3042b-9b9a-41b7-8b15-a93d3f17025e\""
   # ```
-  def to_json(json : NASON::Builder) : Nil
+  def to_nason(json : NASON::Builder) : Nil
     json.string(to_s)
   end
 
