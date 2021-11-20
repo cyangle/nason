@@ -112,7 +112,7 @@
 # for primitive types, but you need to define `to_nason(NASON::Builder)`
 # for custom objects, either manually or using `NASON::Serializable`.
 module NASON
-  VERSION = "0.2.4"
+  VERSION = "0.3.0"
 
   # Generic NASON error.
   class Error < Exception

@@ -1,3 +1,7 @@
+# 0.3.0
+
+Rename json (de)serialization methods to avoid conflicts with json module.
+
 # 0.2.4
 
 Add OAuth and Oauth2 json methods
