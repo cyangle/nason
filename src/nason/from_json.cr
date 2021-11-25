@@ -426,6 +426,24 @@ module Time::EpochMillisConverter
   end
 end
 
+module Time::RFC3339Converter
+  def self.from_nason(value : NASON::PullParser) : Time
+    Time::Format::RFC_3339.parse(value.read_string)
+  end
+end
+
+module Time::RFC2822Converter
+  def self.from_nason(value : NASON::PullParser) : Time
+    Time::Format::RFC_2822.parse(value.read_string)
+  end
+end
+
+module Time::ISO8601DateConverter
+  def self.from_nason(value : NASON::PullParser) : Time
+    Time::Format::ISO_8601_DATE.parse(value.read_string)
+  end
+end
+
 module String::RawConverter
   def self.from_nason(value : NASON::PullParser) : String
     value.read_raw

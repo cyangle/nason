@@ -372,6 +372,24 @@ module Time::EpochMillisConverter
   end
 end
 
+module Time::RFC3339Converter
+  def self.to_nason(value : Time, json : NASON::Builder) : Nil
+    json.string(Time::Format::RFC_3339.format(value, fraction_digits: 0))
+  end
+end
+
+module Time::RFC2822Converter
+  def self.to_nason(value : Time, json : NASON::Builder) : Nil
+    json.string(Time::Format::RFC_2822.format(value))
+  end
+end
+
+module Time::ISO8601DateConverter
+  def self.to_nason(value : Time, json : NASON::Builder) : Nil
+    json.string(Time::Format::ISO_8601_DATE.format(value))
+  end
+end
+
 # Converter to be used with `NASON::Serializable` to read the raw
 # value of a NASON object property as a `String`.
 #

@@ -1,3 +1,7 @@
+# 0.3.1
+
+Add Converters for RFC3399, RFC2822, ISO8601Date
+
 # 0.3.0
 
 Rename json (de)serialization methods to avoid conflicts with json module.

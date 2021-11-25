@@ -173,6 +173,27 @@ class JSONAttrWithTimeEpochMillis
   property value : Time
 end
 
+class JSONAttrWithTimeRFC3339
+  include NASON::Serializable
+
+  @[NASON::Field(converter: Time::RFC3339Converter)]
+  property value : Time
+end
+
+class JSONAttrWithTimeRFC2822
+  include NASON::Serializable
+
+  @[NASON::Field(converter: Time::RFC2822Converter)]
+  property value : Time
+end
+
+class JSONAttrWithTimeISO8601Date
+  include NASON::Serializable
+
+  @[NASON::Field(converter: Time::ISO8601DateConverter)]
+  property value : Time
+end
+
 class JSONAttrWithRaw
   include NASON::Serializable
 
@@ -669,6 +690,30 @@ describe "NASON mapping" do
     json = JSONAttrWithTimeEpochMillis.from_nason(string)
     json.value.should be_a(Time)
     json.value.should eq(Time.unix_ms(1_459_860_483_856))
+    json.to_nason.should eq(string)
+  end
+
+  it "uses Time::RFC3339Converter" do
+    string = %({"value":"2021-01-02T08:29:18Z"})
+    json = JSONAttrWithTimeRFC3339.from_nason(string)
+    json.value.should be_a(Time)
+    json.value.should eq(Time.unix(1_609_576_158))
+    json.to_nason.should eq(string)
+  end
+
+  it "uses Time::RFC2822Converter" do
+    string = %({"value":"Mon, 22 Nov 2021 08:29:18 +0000"})
+    json = JSONAttrWithTimeRFC2822.from_nason(string)
+    json.value.should be_a(Time)
+    json.value.should eq(Time.unix(1637569758))
+    json.to_nason.should eq(string)
+  end
+
+  it "uses Time::ISO8601DateConverter" do
+    string = %({"value":"2021-08-20"})
+    json = JSONAttrWithTimeISO8601Date.from_nason(string)
+    json.value.should be_a(Time)
+    json.value.should eq(Time.unix(1_629_417_600))
     json.to_nason.should eq(string)
   end
 
