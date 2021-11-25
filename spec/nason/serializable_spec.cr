@@ -177,14 +177,14 @@ class JSONAttrWithTimeRFC3339
   include NASON::Serializable
 
   @[NASON::Field(converter: Time::RFC3339Converter)]
-  property value : Time
+  property value : Time? | Null
 end
 
 class JSONAttrWithTimeRFC2822
   include NASON::Serializable
 
   @[NASON::Field(converter: Time::RFC2822Converter)]
-  property value : Time
+  property value : Time?
 end
 
 class JSONAttrWithTimeISO8601Date
@@ -698,6 +698,20 @@ describe "NASON mapping" do
     json = JSONAttrWithTimeRFC3339.from_nason(string)
     json.value.should be_a(Time)
     json.value.should eq(Time.unix(1_609_576_158))
+    json.to_nason.should eq(string)
+  end
+
+  it "uses Time::RFC3339Converter with null value" do
+    string = %({"value":null})
+    json = JSONAttrWithTimeRFC3339.from_nason(string)
+    json.value.should eq(NULL)
+    json.to_nason.should eq(string)
+  end
+
+  it "uses Time::RFC3339Converter when property is missing" do
+    string = %({})
+    json = JSONAttrWithTimeRFC3339.from_nason(string)
+    json.value.should be_nil
     json.to_nason.should eq(string)
   end
 

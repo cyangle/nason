@@ -1,3 +1,7 @@
+# 0.3.2
+
+Fix Converter bug in to_nason when property is nullable
+
 # 0.3.1
 
 Add Converters for RFC3399, RFC2822, ISO8601Date

@@ -10,6 +10,7 @@ Crystal json library with Null value support.
    dependencies:
      nason:
        github: cyangle/nason
+       version: ~> 0.3.2
    ```
 
 2. Run `shards install`
