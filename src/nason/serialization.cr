@@ -277,9 +277,7 @@ module NASON
                   {% end %}
 
                   {% if value[:converter] %}
-                    if _{{name}}.nil?
-                      nil.to_nason(json)
-                    elsif _{{name}}.null?
+                    if _{{name}}.null?
                       NULL.to_nason(json)
                     else
                       {{ value[:converter] }}.to_nason(_{{name}}.not_nil!.not_null!, json)
