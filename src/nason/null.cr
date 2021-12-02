@@ -118,12 +118,4 @@ class Object
   def not_null!
     self
   end
-
-  def present?
-    !nil? && !null?
-  end
-
-  def present!
-    not_nil!.not_null!
-  end
 end
