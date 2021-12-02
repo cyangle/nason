@@ -417,6 +417,11 @@ describe NASON::PullParser do
       pull.read?(UInt64).should be_nil
     end
 
+    it "reads == UInt64::MAX" do
+      pull = JSON::PullParser.new(UInt64::MAX.to_s)
+      pull.read?(UInt64).should eq(UInt64::MAX)
+    end
+
     it "reads > Float64::MAX" do
       pull = NASON::PullParser.new("1" + Float64::MAX.to_s)
       pull.read?(Float64).should be_nil

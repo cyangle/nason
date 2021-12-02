@@ -30,8 +30,18 @@ describe "NASON serialization" do
       Path.from_nason(%("foo/bar")).should eq(Path.new("foo/bar"))
     end
 
+    it "does UInt64.from_json" do
+      UInt64.from_nason(UInt64::MAX.to_s).should eq(UInt64::MAX)
+    end
+
+    it "raises ParserException for overflow UInt64.from_json" do
+      expect_raises(NASON::ParseException, "Can't read UInt64 at line 0, column 0") do
+        UInt64.from_nason("1#{UInt64::MAX}")
+      end
+    end
+
     it "does Array(Nil)#from_nason" do
-      Array(Nil).from_nason("[null, null]").should eq([nil, nil])
+      Array(Null).from_nason("[null, null]").should eq([NULL, NULL])
     end
 
     it "does Array(Bool)#from_nason" do
