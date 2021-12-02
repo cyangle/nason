@@ -112,7 +112,7 @@
 # for primitive types, but you need to define `to_nason(NASON::Builder)`
 # for custom objects, either manually or using `NASON::Serializable`.
 module NASON
-  VERSION = "0.3.2"
+  VERSION = {{ `shards version #{__DIR__}`.chomp.stringify }}
 
   # Generic NASON error.
   class Error < Exception

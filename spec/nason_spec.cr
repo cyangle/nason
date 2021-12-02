@@ -1,10 +1,8 @@
 require "./spec_helper"
 
 describe NASON do
-  # TODO: Write tests
-
   it "has correct version number" do
-    NASON::VERSION.should eq("0.3.2")
+    NASON::VERSION.should eq("0.3.3")
   end
 
   it "parses null value" do

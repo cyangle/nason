@@ -1,3 +1,9 @@
+# 0.3.3
+
+Add Uint64 support
+
+Remove present helper methods from Object
+
 # 0.3.2
 
 Fix Converter bug in to_nason when property is nullable
