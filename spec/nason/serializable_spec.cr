@@ -719,7 +719,7 @@ describe "NASON mapping" do
     string = %({"value":"Mon, 22 Nov 2021 08:29:18 +0000"})
     json = JSONAttrWithTimeRFC2822.from_nason(string)
     json.value.should be_a(Time)
-    json.value.should eq(Time.unix(1637569758))
+    json.value.should eq(Time.unix(1_637_569_758))
     json.to_nason.should eq(string)
   end
 
